@@ -1,0 +1,6 @@
+subscription-config:
+  subscription-details:
+    - fx-currency: eur
+      crypto-currency: btc
+      channel: live_orders
+      uri: wss://ws.bitstamp.net
