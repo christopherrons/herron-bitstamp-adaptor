@@ -1,4 +1,4 @@
-package com.herron.bitstamp.consumer.server.client;
+package com.herron.bitstamp.consumer.server.eventhandler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -6,8 +6,8 @@ import org.slf4j.LoggerFactory;
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class EventLogging {
-    private static final Logger LOGGER = LoggerFactory.getLogger(EventLogging.class);
+public class EventLogger {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventLogger.class);
     private static final int MESSAGE_UPDATE_INTERVAL = 1000;
     private final AtomicLong totalNrOfEvents = new AtomicLong();
     private final Instant startTime = Instant.now();
@@ -16,18 +16,18 @@ public class EventLogging {
 
     private final String eventLoggDescription;
 
-    public EventLogging() {
+    public EventLogger() {
         this("");
     }
 
-    public EventLogging(String eventLoggDescription) {
+    public EventLogger(String eventLoggDescription) {
         this.eventLoggDescription = eventLoggDescription;
     }
 
     public void logEvent() {
         if (totalNrOfEvents.incrementAndGet() % MESSAGE_UPDATE_INTERVAL == 0) {
             Instant currentTime = Instant.now();
-            LOGGER.info(String.format("%s: Events received: %s. Current event rate %s/s, average event rate %s/s",
+            LOGGER.info(String.format("%s: Messages received: %s. Current event rate %s/s, average event rate %s/s",
                     eventLoggDescription, totalNrOfEvents.get(), getCurrentEventsPerSecond(currentTime), getAverageEventsPerSecond(currentTime)));
             lastLogUpdateTime = currentTime;
             lastUpdateTimeNrOfEvents = new AtomicLong(totalNrOfEvents.get());

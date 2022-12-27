@@ -1,7 +1,7 @@
 package com.herron.bitstamp.consumer.server.config;
 
 import com.herron.bitstamp.consumer.server.BitstampConsumer;
-import com.herron.bitstamp.consumer.server.EventHandler;
+import com.herron.bitstamp.consumer.server.eventhandler.EventHandler;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,7 +31,6 @@ public class BitstampConsumerConfig {
         private final List<SubscriptionDetail> subscriptionDetails = new ArrayList<>();
 
         public record SubscriptionDetail(String fxCurrency, String cryptoCurrency, String channel, String uri) {
-
         }
 
         public List<SubscriptionDetail> getSubscriptionDetails() {

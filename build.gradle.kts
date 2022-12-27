@@ -41,6 +41,7 @@ dependencies {
     implementation(libs.tyrus.standalone.client)
     implementation(libs.javax.json.api)
     implementation(libs.javax.json)
+    implementation(libs.javafaker)
 
     // External Test Libs
     testImplementation(testlibs.junit.jupiter.api)

@@ -1,7 +1,7 @@
 package com.herron.bitstamp.consumer.server.client;
 
-import com.herron.bitstamp.consumer.server.EventHandler;
-import com.herron.bitstamp.consumer.server.model.BitstampEvent;
+import com.herron.bitstamp.consumer.server.eventhandler.EventHandler;
+import com.herron.bitstamp.consumer.server.model.BitstampEventData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,14 +14,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 public class BitstampSubscription {
     private static final Logger LOGGER = LoggerFactory.getLogger(BitstampSubscription.class);
     private static final String SUBSCRIBE = "bts:subscribe";
     private static final String UNSUBSCRIBE = "bts:unsubscribe";
     private static final String HEART_BEAT = "bts:heartbeat";
-    private static final BitstampJsonMessageDecoder BITSTAMP_JSON_MESSAGE_DECODER = new BitstampJsonMessageDecoder(BitstampEvent.class);
+    private static final BitstampJsonMessageDecoder BITSTAMP_JSON_MESSAGE_DECODER = new BitstampJsonMessageDecoder(BitstampEventData.class);
 
     private final String fxCurrency;
     private final String cryptoCurrency;
@@ -38,7 +37,7 @@ public class BitstampSubscription {
 
 
     public BitstampSubscription(EventHandler eventHandler, String fxCurrency, String cryptoCurrency, String channel, String uri) throws DeploymentException, IOException, URISyntaxException {
-        this.messageHandler = createMessageHandler(eventHandler::handleEvent);
+        this.messageHandler = createMessageHandler(eventHandler);
         this.fxCurrency = fxCurrency;
         this.cryptoCurrency = cryptoCurrency;
         this.channel = channel;
@@ -47,11 +46,11 @@ public class BitstampSubscription {
         startHeartBeats();
     }
 
-    private MessageHandler createMessageHandler(Consumer<String> eventHandler) {
+    private MessageHandler createMessageHandler(EventHandler eventHandler) {
         return new MessageHandler.Whole<String>() {
             @Override
             public void onMessage(String message) {
-                BitstampEvent event = BITSTAMP_JSON_MESSAGE_DECODER.decodeMessage(message);
+                BitstampEventData event = BITSTAMP_JSON_MESSAGE_DECODER.decodeMessage(message);
                 if (event.getEventDescriptionEnum() != null) {
                     handleEvent(event, eventHandler);
                 } else {
@@ -139,7 +138,7 @@ public class BitstampSubscription {
         subscribe();
     }
 
-    private void handleEvent(BitstampEvent event, Consumer<String> eventHandler) {
+    private void handleEvent(BitstampEventData event, EventHandler eventHandler) {
         switch (event.getEventDescriptionEnum()) {
             case SUBSCRIPTION_SUCCEEDED -> {
                 isSubscribed = true;
@@ -158,8 +157,8 @@ public class BitstampSubscription {
                 isSubscribed = false;
                 subscribe();
             }
-            case ORDER_CREATED, ORDER_DELETED, ORDER_UPDATED -> eventHandler.accept(event.getEvent());
-            case TRADE -> eventHandler.accept(event.getEvent());
+            case ORDER_CREATED, ORDER_DELETED, ORDER_UPDATED -> eventHandler.handleEvent(event.getOrder());
+            case TRADE -> eventHandler.handleEvent(event.getTrade());
             default -> LOGGER.warn(String.format("Unhandled Bitstamp event received %s: ", event));
         }
     }

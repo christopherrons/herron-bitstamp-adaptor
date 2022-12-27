@@ -12,6 +12,7 @@ dependencyResolutionManagement {
             library("tyrus.standalone.client", "org.glassfish.tyrus.bundles:tyrus-standalone-client:1.18")
             library("javax.json.api", "javax.json:javax.json-api:1.1.4")
             library("javax.json", "org.glassfish:javax.json:1.1.4")
+            library("javafaker", "com.github.javafaker:javafaker:1.0.2")
         }
 
         create("testlibs") {
