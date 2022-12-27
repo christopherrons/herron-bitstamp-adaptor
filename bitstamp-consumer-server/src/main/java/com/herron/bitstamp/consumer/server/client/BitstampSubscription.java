@@ -1,6 +1,7 @@
 package com.herron.bitstamp.consumer.server.client;
 
-import com.herron.bitstamp.consumer.server.eventhandler.EventHandler;
+import com.herron.bitstamp.consumer.server.api.EventHandler;
+import com.herron.bitstamp.consumer.server.eventhandler.DefaultEventHandler;
 import com.herron.bitstamp.consumer.server.model.BitstampEventData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,10 +114,9 @@ public class BitstampSubscription {
     }
 
     private void startHeartBeats() {
+        LOGGER.info(String.format("Starting heartbeats for %s! Session status: %s, isSubscribed status: %s", getTradingPair(), session.isOpen(), isSubscribed));
         RemoteEndpoint.Basic basicRemoteEndpoint = session.getBasicRemote();
         heartBeatExecutorService.scheduleAtFixedRate(() -> {
-            LOGGER.info(String.format("Starting heartbeats for %s! Session status: %s, isSubscribed status: %s", getTradingPair(), session.isOpen(), isSubscribed));
-
             try {
                 basicRemoteEndpoint.sendObject(createHeartBeatJson());
             } catch (Exception e) {

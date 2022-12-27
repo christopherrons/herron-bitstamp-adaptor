@@ -7,6 +7,6 @@ public class BitstampUtils {
     }
 
     public static String createOrderbookId(String channel) {
-        return String.format("bitstamp_stock-%s", channel);
+        return String.format("bitstamp_stock_%s", channel);
     }
 }

@@ -1,8 +1,8 @@
 package com.herron.bitstamp.consumer.server;
 
+import com.herron.bitstamp.consumer.server.api.EventHandler;
 import com.herron.bitstamp.consumer.server.client.BitstampSubscription;
 import com.herron.bitstamp.consumer.server.config.BitstampConsumerConfig;
-import com.herron.bitstamp.consumer.server.eventhandler.EventHandler;
 import com.herron.bitstamp.consumer.server.model.BitstampOrderbook;
 import com.herron.bitstamp.consumer.server.model.BitstampStateChange;
 import com.herron.bitstamp.consumer.server.model.BitstampStockInstrument;
