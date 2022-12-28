@@ -3,20 +3,17 @@ spring:
     bootstrap-servers: "localhost:9092"
 
 subscription-config:
+  uri: wss://ws.bitstamp.net
   subscription-details:
     - fx-currency: eur
       crypto-currency: btc
       channel: live_orders
-      uri: wss://ws.bitstamp.net
     - fx-currency: usd
       crypto-currency: btc
       channel: live_orders
-      uri: wss://ws.bitstamp.net
     - fx-currency: eur
       crypto-currency: xrp
       channel: live_orders
-      uri: wss://ws.bitstamp.net
     - fx-currency: usd
       crypto-currency: xrp
       channel: live_orders
-      uri: wss://ws.bitstamp.net

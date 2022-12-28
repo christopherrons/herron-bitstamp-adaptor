@@ -38,30 +38,32 @@ public class DefaultEventHandler implements EventHandler {
     public void handleEvents(List<BitstampMarketEvent> events) {
         for (var event : events) {
             switch (event.getEventTypeEnum()) {
-                case ORDER -> {
-                    BitstampOrder order = ((BitstampOrder) event);
-                    if (order.orderOperation() == OrderOperationEnum.CREATE ||
-                            (order.orderOperation() == OrderOperationEnum.UPDATE && orderIds.contains(order.orderId()))) {
-                        // We only handle updates if we have received the initial create
-                        orderIds.add(order.orderId());
-                        kafkaTemplate.send(TopicEnum.BITSTAMP_MARKET_DATA.getTopicName(), event);
-                        eventLogging.logEvent();
-                    }
-                }
-                case TRADE -> {
-                    BitstampTrade trade = ((BitstampTrade) event);
-                    // We do not want to process trades where we have never seen the order
-                    if (orderIds.contains(trade.askOrderId()) && orderIds.contains(trade.buyOrderId())) {
-                        kafkaTemplate.send(TopicEnum.BITSTAMP_MARKET_DATA.getTopicName(), event);
-
-                        eventLogging.logEvent();
-                    }
-                }
+                case ORDER -> handleOrder((BitstampOrder) event);
+                case TRADE -> handleTrade((BitstampTrade) event);
                 default -> {
                     kafkaTemplate.send(TopicEnum.BITSTAMP_MARKET_DATA.getTopicName(), event);
                     eventLogging.logEvent();
                 }
             }
+        }
+    }
+
+    private void handleOrder(BitstampOrder order) {
+        if (order.orderOperation() == OrderOperationEnum.CREATE ||
+                (order.orderOperation() == OrderOperationEnum.UPDATE && orderIds.contains(order.orderId()))) {
+            // We only handle updates if we have received the initial create
+            orderIds.add(order.orderId());
+            kafkaTemplate.send(TopicEnum.BITSTAMP_MARKET_DATA.getTopicName(), order);
+            eventLogging.logEvent();
+        }
+    }
+
+    private void handleTrade(BitstampTrade trade) {
+        // We do not want to process trades where we have never seen the order
+        if (orderIds.contains(trade.askOrderId()) && orderIds.contains(trade.buyOrderId())) {
+            kafkaTemplate.send(TopicEnum.BITSTAMP_MARKET_DATA.getTopicName(), trade);
+
+            eventLogging.logEvent();
         }
     }
 

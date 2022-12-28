@@ -35,8 +35,7 @@ public class BitstampConsumer {
     public void init() {
         for (var details : subscriptionDetailConfig.getSubscriptionDetails()) {
             if (keyToSubscription.containsKey(details)) {
-                LOGGER.warn("Duplicate subscription detail: {}", details);
-                continue;
+                throw new IllegalArgumentException(String.format("Duplicate subscription detail: %s", details));
             }
             try {
                 initOrderbook(details);
@@ -45,7 +44,7 @@ public class BitstampConsumer {
                         details.fxCurrency(),
                         details.cryptoCurrency(),
                         details.channel(),
-                        details.uri()
+                        subscriptionDetailConfig.getUri()
                 );
                 subscription.subscribe();
                 keyToSubscription.computeIfAbsent(details, k -> subscription);

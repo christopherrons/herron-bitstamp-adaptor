@@ -32,9 +32,18 @@ public class BitstampConsumerConfig {
     @ConfigurationProperties(prefix = "subscription-config")
     public static class SubscriptionDetailConfig {
 
+        private String uri;
         private final List<SubscriptionDetail> subscriptionDetails = new ArrayList<>();
 
-        public record SubscriptionDetail(String fxCurrency, String cryptoCurrency, String channel, String uri) {
+        public void setUri(String uri) {
+            this.uri = uri;
+        }
+
+        public String getUri() {
+            return uri;
+        }
+
+        public record SubscriptionDetail(String fxCurrency, String cryptoCurrency, String channel) {
         }
 
         public List<SubscriptionDetail> getSubscriptionDetails() {
@@ -53,4 +62,5 @@ public class BitstampConsumerConfig {
             return Objects.hash(subscriptionDetails);
         }
     }
+
 }
