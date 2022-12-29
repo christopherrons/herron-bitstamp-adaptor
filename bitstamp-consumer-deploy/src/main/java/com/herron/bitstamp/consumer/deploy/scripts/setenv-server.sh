@@ -3,6 +3,6 @@
 #
 LXC_USER=herron
 
-COMMON_VERSION_FILE="bitstamp-adaptor-running.txt"
+COMMON_VERSION_FILE="bitstamp-consumer-running.txt"
 RELEASE_DIR="releases"
 JVM_OPTS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"

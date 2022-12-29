@@ -17,4 +17,9 @@ public record BitstampOrderbook(String orderbookId, String instrumentId, long ti
     public EvenTypeEnum getEventTypeEnum() {
         return EvenTypeEnum.ORDERBOOK;
     }
+
+    @Override
+    public String getMessageType() {
+        return "BSOB";
+    }
 }

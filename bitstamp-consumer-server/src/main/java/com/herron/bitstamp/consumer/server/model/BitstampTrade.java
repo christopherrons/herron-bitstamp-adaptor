@@ -68,4 +68,9 @@ public record BitstampTrade(String bidParticipant,
     public EvenTypeEnum getEventTypeEnum() {
         return EvenTypeEnum.TRADE;
     }
+
+    @Override
+    public String getMessageType() {
+        return "BSTR";
+    }
 }

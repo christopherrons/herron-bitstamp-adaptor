@@ -40,10 +40,8 @@ public class DefaultEventHandler implements EventHandler {
             switch (event.getEventTypeEnum()) {
                 case ORDER -> handleOrder((BitstampOrder) event);
                 case TRADE -> handleTrade((BitstampTrade) event);
-                default -> {
-                    kafkaTemplate.send(TopicEnum.BITSTAMP_MARKET_DATA.getTopicName(), event);
-                    eventLogging.logEvent();
-                }
+                default -> publish(event);
+
             }
         }
     }
@@ -53,18 +51,20 @@ public class DefaultEventHandler implements EventHandler {
                 (order.orderOperation() == OrderOperationEnum.UPDATE && orderIds.contains(order.orderId()))) {
             // We only handle updates if we have received the initial create
             orderIds.add(order.orderId());
-            kafkaTemplate.send(TopicEnum.BITSTAMP_MARKET_DATA.getTopicName(), order);
-            eventLogging.logEvent();
+            publish(order);
         }
     }
 
     private void handleTrade(BitstampTrade trade) {
         // We do not want to process trades where we have never seen the order
         if (orderIds.contains(trade.askOrderId()) && orderIds.contains(trade.buyOrderId())) {
-            kafkaTemplate.send(TopicEnum.BITSTAMP_MARKET_DATA.getTopicName(), trade);
-
-            eventLogging.logEvent();
+            publish(trade);
         }
+    }
+
+    private void publish(BitstampMarketEvent event) {
+        kafkaTemplate.send(TopicEnum.BITSTAMP_MARKET_DATA.getTopicName(), event.getMessageType(), event);
+        eventLogging.logEvent();
     }
 
     private TimeBoundPriorityQueue<BitstampMarketEvent> findOrCreateQueue(final BitstampMarketEvent event) {

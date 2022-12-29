@@ -66,4 +66,9 @@ public record BitstampOrder(OrderOperationEnum orderOperation,
     public EvenTypeEnum getEventTypeEnum() {
         return EvenTypeEnum.ORDER;
     }
+
+    @Override
+    public String getMessageType() {
+        return "BSOR";
+    }
 }

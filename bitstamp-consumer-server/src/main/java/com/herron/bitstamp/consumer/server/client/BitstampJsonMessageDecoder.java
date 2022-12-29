@@ -6,13 +6,13 @@ import com.herron.bitstamp.consumer.server.model.BitstampEventData;
 
 public class BitstampJsonMessageDecoder {
     private final Class<? extends BitstampEventData> classToBeDecoded;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public BitstampJsonMessageDecoder(Class<? extends BitstampEventData> classToBeDecoded) {
         this.classToBeDecoded = classToBeDecoded;
     }
 
     public BitstampEventData decodeMessage(final String message) {
-        ObjectMapper objectMapper = new ObjectMapper();
         try {
             return objectMapper.readValue(message, classToBeDecoded);
         } catch (JsonProcessingException e) {

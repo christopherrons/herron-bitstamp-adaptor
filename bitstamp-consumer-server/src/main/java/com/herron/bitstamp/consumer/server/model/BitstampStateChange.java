@@ -18,4 +18,9 @@ public record BitstampStateChange(String orderbookId, String stateChange, long t
     public EvenTypeEnum getEventTypeEnum() {
         return EvenTypeEnum.STATE_CHANGE;
     }
+
+    @Override
+    public String getMessageType() {
+        return "BSSC";
+    }
 }

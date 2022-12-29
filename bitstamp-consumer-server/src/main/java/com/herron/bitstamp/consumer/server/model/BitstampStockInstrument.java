@@ -23,4 +23,9 @@ public record BitstampStockInstrument(String instrumentId, String instrumentType
     public EvenTypeEnum getEventTypeEnum() {
         return EvenTypeEnum.INSTRUMENT;
     }
+
+    @Override
+    public String getMessageType() {
+        return "BSSI";
+    }
 }

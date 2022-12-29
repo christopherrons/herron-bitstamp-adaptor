@@ -31,4 +31,4 @@ Start the application by running:
 ## Crontab
 
 Crontab is used for
-scheduled [task](../bitstamp-consumer-deploy/src/main/java/com/herron/bitstamp/consumer/deploy/cron/bitstamp-adaptor.crontab).
+scheduled [task](../bitstamp-consumer-deploy/src/main/java/com/herron/bitstamp/consumer/deploy/cron/bitstamp-consumer.crontab).

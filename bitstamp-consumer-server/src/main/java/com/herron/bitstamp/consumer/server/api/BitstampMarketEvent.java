@@ -9,4 +9,6 @@ public interface BitstampMarketEvent {
     String getId();
 
     EvenTypeEnum getEventTypeEnum();
+
+    String getMessageType();
 }
