@@ -2,6 +2,10 @@
 
 Once the application is deployed, script are used for starting, monitoring and stopping the application.
 
+## Table of Content
+
+* [Scripts](#scripts): Deploy scripts.
+
 ## Scripts
 
 ### Variables

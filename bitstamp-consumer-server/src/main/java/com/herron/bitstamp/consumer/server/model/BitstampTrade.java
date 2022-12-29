@@ -40,8 +40,8 @@ public record BitstampTrade(String bidParticipant,
     "event":"trade"
  }*/
     public BitstampTrade(@JsonProperty("data") Map<String, Object> data, @JsonProperty("channel") String channel, @JsonProperty("event") String event) {
-        this(String.format("Member=Bitstamp; User=%s", getUserFromPool()),
-                String.format("Member=Bitstamp; User=%s", getUserFromPool()),
+        this(String.format("Bitstamp;%s", getUserFromPool()),
+                String.format("Bitstamp;%s", getUserFromPool()),
                 !data.isEmpty() ? (int) data.get("id") : -1,
                 !data.isEmpty() ? (String) data.get("buy_order_id") : "NONE",
                 !data.isEmpty() ? (String) data.get("sell_order_id") : "NONE",

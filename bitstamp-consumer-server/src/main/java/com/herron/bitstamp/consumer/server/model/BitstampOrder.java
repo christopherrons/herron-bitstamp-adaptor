@@ -40,7 +40,7 @@ public record BitstampOrder(OrderOperationEnum orderOperation,
  }*/
     public BitstampOrder(@JsonProperty("data") Map<String, Object> data, @JsonProperty("channel") String channel, @JsonProperty("event") String event) {
         this(OrderOperationEnum.extractValue(event),
-                String.format("Member=Bitstamp; User=%s", getUserFromPool()),
+                String.format("Bitstamp;%s", getUserFromPool()),
                 !data.isEmpty() ? (String) data.get("id_str") : "NONE",
                 !data.isEmpty() ? (int) data.get("order_type") : -1,
                 !data.isEmpty() ? Double.parseDouble((String) data.get("amount_str")) : -1.0,

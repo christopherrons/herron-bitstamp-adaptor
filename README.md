@@ -13,7 +13,8 @@ see [official documentation](https://www.bitstamp.net/websocket/v2/).
 ## Requirements
 
 * Java 17
-* Kafka (required with default event handling)
+* [Kafka](https://www.apache.org/dyn/closer.cgi?path=/kafka/3.3.1/kafka_2.13-3.3.1.tgz)
+  (required with default event handling)
 
 ## Documentation
 
