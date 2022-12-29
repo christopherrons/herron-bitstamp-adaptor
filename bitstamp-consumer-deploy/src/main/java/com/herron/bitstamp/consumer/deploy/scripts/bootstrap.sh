@@ -1,5 +1,5 @@
 #!/bin/bash
-source setenv.sh
+source setenv-server.sh
 
 function verifyDirectory() {
   deployDirectory="/home/$LXC_USER/deploy"

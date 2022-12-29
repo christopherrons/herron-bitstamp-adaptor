@@ -1,7 +1,6 @@
 package com.herron.bitstamp.consumer.server.client;
 
 import com.herron.bitstamp.consumer.server.api.EventHandler;
-import com.herron.bitstamp.consumer.server.eventhandler.DefaultEventHandler;
 import com.herron.bitstamp.consumer.server.model.BitstampEventData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,20 +54,20 @@ public class BitstampSubscription {
                 if (event.getEventDescriptionEnum() != null) {
                     handleEvent(event, eventHandler);
                 } else {
-                    LOGGER.info(String.format("Message: %s not decodeable.", message));
+                    LOGGER.info("Message: {} not decode-able.", message);
                 }
             }
         };
     }
 
     private Session createSession() throws DeploymentException, IOException {
-        LOGGER.info(String.format("Attempting to connect to: %s.", uri));
+        LOGGER.info("Attempting to connect to: {}.", uri);
 
         final WebSocketContainer webSocketContainer = ContainerProvider.getWebSocketContainer();
         session = webSocketContainer.connectToServer(new CustomClientEndpoint(messageHandler), uri);
 
         if (session.isOpen()) {
-            LOGGER.info(String.format("Successfully connected to: %s.", uri));
+            LOGGER.info("Successfully connected to: {}.", uri);
         }
 
         return session;
@@ -86,10 +85,10 @@ public class BitstampSubscription {
                     e.printStackTrace();
                 }
                 timeWaited = timeWaited + timeout;
-                LOGGER.info(String.format("Waiting for session to open before subscribing to: %s. Total time waited %s.", createChannel(), timeWaited));
+                LOGGER.info("Waiting for session to open before subscribing to: {}. Total time waited {}.", createChannel(), timeWaited);
             }
 
-            LOGGER.info(String.format("Attempting to subscribe to: %s.", createChannel()));
+            LOGGER.info("Attempting to subscribe to: {}.", createChannel());
             RemoteEndpoint.Basic basicRemoteEndpoint = session.getBasicRemote();
             try {
                 basicRemoteEndpoint.sendObject(createSubscriptionJson());
@@ -100,27 +99,27 @@ public class BitstampSubscription {
     }
 
     public void unsubscribe() {
-        LOGGER.info(String.format("Attempting to unsubscribe to: %s", createChannel()));
+        LOGGER.info("Attempting to unsubscribe to: {}", createChannel());
         RemoteEndpoint.Basic basicRemoteEndpoint = session.getBasicRemote();
         try {
             basicRemoteEndpoint.sendObject(createUnsubscribeJson());
             isSubscribed = false;
             heartBeatExecutorService.shutdown();
             session.close();
-            LOGGER.info(String.format("Successfully unsubscribed to: %s and closed session.", createChannel()));
+            LOGGER.info("Successfully unsubscribed to: {} and closed session.", createChannel());
         } catch (IOException | EncodeException e) {
             e.printStackTrace();
         }
     }
 
     private void startHeartBeats() {
-        LOGGER.info(String.format("Starting heartbeats for %s! Session status: %s, isSubscribed status: %s", getTradingPair(), session.isOpen(), isSubscribed));
+        LOGGER.info("Starting heartbeats for {}! Session status: {}, isSubscribed status: {}", getTradingPair(), session.isOpen(), isSubscribed);
         RemoteEndpoint.Basic basicRemoteEndpoint = session.getBasicRemote();
         heartBeatExecutorService.scheduleAtFixedRate(() -> {
             try {
                 basicRemoteEndpoint.sendObject(createHeartBeatJson());
             } catch (Exception e) {
-                LOGGER.warn(String.format("Could not run heartbeat for %s! Session status: %s, isSubscribed status: %s", getTradingPair(), session.isOpen(), isSubscribed));
+                LOGGER.warn("Could not run heartbeat for {}! Session status: {}, isSubscribed status: {}", getTradingPair(), session.isOpen(), isSubscribed);
                 try {
                     unsubscribe();
                     reconnect();
@@ -142,14 +141,13 @@ public class BitstampSubscription {
         switch (event.getEventDescriptionEnum()) {
             case SUBSCRIPTION_SUCCEEDED -> {
                 isSubscribed = true;
-                LOGGER.info(String.format("Successfully subscribed to: %s.", createChannel()));
+                LOGGER.info("Successfully subscribed to: {}.", createChannel());
             }
             case HEART_BEAT -> {
                 if (event.getHeartBeat().isSuccessful()) {
-                    LOGGER.info(String.format("Heartbeat successful %s." + " Session status: %s, isSubscribed status: %s.", getTradingPair(), session.isOpen(), isSubscribed));
+                    LOGGER.debug("Heartbeat successful {}." + " Session status: {}, isSubscribed status: {}.", getTradingPair(), session.isOpen(), isSubscribed);
                 } else {
-                    LOGGER.warn(String.format("Heartbeat NOT successful %s. Event: %" +
-                            " Session status: %s, isSubscribed status: %s.", getTradingPair(), event, session.isOpen(), isSubscribed));
+                    LOGGER.warn("Heartbeat NOT successful {}. Event: {}" + " Session status: {}, isSubscribed status: {}.", getTradingPair(), event, session.isOpen(), isSubscribed);
                 }
             }
             case FORCED_RECONNECT -> {
@@ -159,7 +157,7 @@ public class BitstampSubscription {
             }
             case ORDER_CREATED, ORDER_DELETED, ORDER_UPDATED -> eventHandler.handleEvent(event.getOrder());
             case TRADE -> eventHandler.handleEvent(event.getTrade());
-            default -> LOGGER.warn(String.format("Unhandled Bitstamp event received %s: ", event));
+            default -> LOGGER.warn("Unhandled Bitstamp event received {}: ", event);
         }
     }
 

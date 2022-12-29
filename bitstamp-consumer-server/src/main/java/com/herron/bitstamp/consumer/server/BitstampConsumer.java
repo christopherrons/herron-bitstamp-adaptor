@@ -59,7 +59,7 @@ public class BitstampConsumer {
         LOGGER.info("Init Orderbook for detail: {}", detail);
         var instrument = new BitstampStockInstrument(createInstrumentId(detail.channel()), detail.fxCurrency(), Instant.now().toEpochMilli());
         var orderbook = new BitstampOrderbook(createOrderbookId(detail.channel()), instrument.instrumentId(), Instant.now().toEpochMilli());
-        var stateChange = new BitstampStateChange(orderbook.orderbookId(), String.format("continous trading"), Instant.now().toEpochMilli());
+        var stateChange = new BitstampStateChange(orderbook.orderbookId(), "continuous trading", Instant.now().toEpochMilli());
         eventHandler.handleEvents(List.of(instrument, orderbook, stateChange));
     }
 

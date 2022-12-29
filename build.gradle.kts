@@ -70,7 +70,7 @@ tasks.register("deployToServer") {
     remotes {
         withGroovyBuilder {
             "create"("webServer") {
-                setProperty("host", "bitstamp-adaptor-1")
+                    setProperty("host", "bitstamp-consumer-1")
                 setProperty("user", "herron")
                 setProperty("agent", true)
             }
@@ -86,8 +86,8 @@ tasks.register("deployToServer") {
                         "into" to "/home/herron/deploy"
                     )
                 )
-                execute("tar -xf /home/herron/deploy/bitstamp-adaptor-${version}.tar.gz --directory /home/herron/deploy")
-                execute("rm /home/herron/deploy/bitstamp-adaptor-${version}.tar.gz ")
+                execute("tar -xf /home/herron/deploy/bitstamp-consumer-${version}.tar.gz --directory /home/herron/deploy/")
+                execute("rm /home/herron/deploy/bitstamp-consumer-${version}.tar.gz ")
                 execute("cd /home/herron/deploy/ && bash /home/herron/deploy/bootstrap.sh")
             })
         })

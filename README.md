@@ -17,7 +17,8 @@ see [official documentation](https://www.bitstamp.net/websocket/v2/).
 
 ## Documentation
 
-* [Deploy Scripts](docs/deploy-scripts.md): Useful scripts once the application is deployed..
+* [Deploy Scripts](docs/deploy-scripts.md): Useful scripts once the application is deployed.
+* [Data Flow](docs/data-flow.md): Visualization of the application data flow.
 
 ## Configuration
 
