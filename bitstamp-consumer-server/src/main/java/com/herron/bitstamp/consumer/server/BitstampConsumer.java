@@ -3,7 +3,7 @@ package com.herron.bitstamp.consumer.server;
 import com.herron.bitstamp.consumer.server.api.EventHandler;
 import com.herron.bitstamp.consumer.server.client.BitstampSubscription;
 import com.herron.bitstamp.consumer.server.config.BitstampConsumerConfig;
-import com.herron.bitstamp.consumer.server.model.BitstampOrderbook;
+import com.herron.bitstamp.consumer.server.model.BitstampOrderbookData;
 import com.herron.bitstamp.consumer.server.model.BitstampStateChange;
 import com.herron.bitstamp.consumer.server.model.BitstampStockInstrument;
 import org.slf4j.Logger;
@@ -58,7 +58,7 @@ public class BitstampConsumer {
     private void initOrderbook(BitstampConsumerConfig.SubscriptionDetailConfig.SubscriptionDetail detail) {
         LOGGER.info("Init Orderbook for detail: {}", detail);
         var instrument = new BitstampStockInstrument(createInstrumentId(detail.channel()), detail.fxCurrency(), Instant.now().toEpochMilli());
-        var orderbook = new BitstampOrderbook(createOrderbookId(detail.channel()), instrument.instrumentId(), Instant.now().toEpochMilli());
+        var orderbook = new BitstampOrderbookData(createOrderbookId(detail.channel()), instrument.instrumentId(), Instant.now().toEpochMilli());
         var stateChange = new BitstampStateChange(orderbook.orderbookId(), "continuous trading", Instant.now().toEpochMilli());
         eventHandler.handleEvents(List.of(instrument, orderbook, stateChange));
     }
