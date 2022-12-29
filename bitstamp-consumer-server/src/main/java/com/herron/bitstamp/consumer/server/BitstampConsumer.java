@@ -44,21 +44,21 @@ public class BitstampConsumer {
             try {
                 var subscription = new BitstampSubscription(
                         eventHandler,
-                        details.channel,
+                        details.channel(),
                         subscriptionDetailConfig.getUri()
                 );
                 subscription.subscribe();
                 keyToSubscription.computeIfAbsent(details, k -> subscription);
 
             } catch (DeploymentException | IOException | URISyntaxException e) {
-                LOGGER.error("Unable to subscribe to channel {}: {}", details, e);
+                LOGGER.error("Unable to subscribe to channel() {}: {}", details, e);
             }
         }
     }
 
     private void initOrderbook(BitstampConsumerConfig.SubscriptionDetailConfig.SubscriptionDetail detail) {
-        var instrument = new BitstampStockInstrument(createInstrumentId(detail.channel), detail.channel.split("_")[2].substring(3, 6), Instant.now().toEpochMilli());
-        var orderbook = new BitstampOrderbookData(createOrderbookId(detail.channel), instrument.instrumentId(), "fifo", Instant.now().toEpochMilli());
+        var instrument = new BitstampStockInstrument(createInstrumentId(detail.channel()), detail.channel().split("_")[2].substring(3, 6), Instant.now().toEpochMilli());
+        var orderbook = new BitstampOrderbookData(createOrderbookId(detail.channel()), instrument.instrumentId(), "fifo", Instant.now().toEpochMilli());
         var stateChange = new BitstampStateChange(orderbook.orderbookId(), "continuous trading", Instant.now().toEpochMilli());
         eventHandler.handleEvents(List.of(instrument, orderbook, stateChange));
         LOGGER.info("Init Orderbook for detail complete: {}", detail);

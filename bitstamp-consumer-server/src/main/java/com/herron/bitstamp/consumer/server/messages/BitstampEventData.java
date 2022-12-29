@@ -15,7 +15,7 @@ public record BitstampEventData(@JsonProperty("data") Map<String, Object> data, 
         return data;
     }
 
-    public String getchannel {
+    public String getchannel() {
         return channel;
     }
 
