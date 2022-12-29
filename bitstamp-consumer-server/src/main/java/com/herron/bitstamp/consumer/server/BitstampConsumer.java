@@ -37,8 +37,11 @@ public class BitstampConsumer {
             if (keyToSubscription.containsKey(details)) {
                 throw new IllegalArgumentException(String.format("Duplicate subscription detail: %s", details));
             }
+            initOrderbook(details);
+        }
+
+        for (var details : subscriptionDetailConfig.getSubscriptionDetails()) {
             try {
-                initOrderbook(details);
                 var subscription = new BitstampSubscription(
                         eventHandler,
                         details.fxCurrency(),
@@ -56,11 +59,11 @@ public class BitstampConsumer {
     }
 
     private void initOrderbook(BitstampConsumerConfig.SubscriptionDetailConfig.SubscriptionDetail detail) {
-        LOGGER.info("Init Orderbook for detail: {}", detail);
         var instrument = new BitstampStockInstrument(createInstrumentId(detail.channel()), detail.fxCurrency(), Instant.now().toEpochMilli());
-        var orderbook = new BitstampOrderbookData(createOrderbookId(detail.channel()), instrument.instrumentId(), Instant.now().toEpochMilli());
+        var orderbook = new BitstampOrderbookData(createOrderbookId(detail.channel()), instrument.instrumentId(), "fifo", Instant.now().toEpochMilli());
         var stateChange = new BitstampStateChange(orderbook.orderbookId(), "continuous trading", Instant.now().toEpochMilli());
         eventHandler.handleEvents(List.of(instrument, orderbook, stateChange));
+        LOGGER.info("Init Orderbook for detail complete: {}", detail);
     }
 
 }

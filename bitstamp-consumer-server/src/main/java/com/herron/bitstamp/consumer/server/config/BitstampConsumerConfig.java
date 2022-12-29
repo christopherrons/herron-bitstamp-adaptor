@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Objects;
 
 @Configuration
-@Import({KafkaProducerConfig.class})
 public class BitstampConsumerConfig {
 
     @Bean
