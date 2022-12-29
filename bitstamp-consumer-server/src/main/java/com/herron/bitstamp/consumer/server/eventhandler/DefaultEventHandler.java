@@ -4,8 +4,8 @@ import com.herron.bitstamp.consumer.server.api.BitstampMarketEvent;
 import com.herron.bitstamp.consumer.server.api.EventHandler;
 import com.herron.bitstamp.consumer.server.enums.OrderOperationEnum;
 import com.herron.bitstamp.consumer.server.enums.TopicEnum;
-import com.herron.bitstamp.consumer.server.model.BitstampOrder;
-import com.herron.bitstamp.consumer.server.model.BitstampTrade;
+import com.herron.bitstamp.consumer.server.messages.BitstampOrder;
+import com.herron.bitstamp.consumer.server.messages.BitstampTrade;
 import org.springframework.kafka.core.KafkaTemplate;
 
 import java.util.HashSet;

@@ -3,9 +3,9 @@ package com.herron.bitstamp.consumer.server;
 import com.herron.bitstamp.consumer.server.api.EventHandler;
 import com.herron.bitstamp.consumer.server.client.BitstampSubscription;
 import com.herron.bitstamp.consumer.server.config.BitstampConsumerConfig;
-import com.herron.bitstamp.consumer.server.model.BitstampOrderbookData;
-import com.herron.bitstamp.consumer.server.model.BitstampStateChange;
-import com.herron.bitstamp.consumer.server.model.BitstampStockInstrument;
+import com.herron.bitstamp.consumer.server.messages.BitstampOrderbookData;
+import com.herron.bitstamp.consumer.server.messages.BitstampStateChange;
+import com.herron.bitstamp.consumer.server.messages.BitstampStockInstrument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

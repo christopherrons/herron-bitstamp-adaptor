@@ -1,7 +1,7 @@
 package com.herron.bitstamp.consumer.server.client;
 
 import com.herron.bitstamp.consumer.server.api.EventHandler;
-import com.herron.bitstamp.consumer.server.model.BitstampEventData;
+import com.herron.bitstamp.consumer.server.messages.BitstampEventData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

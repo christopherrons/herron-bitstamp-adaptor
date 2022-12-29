@@ -1,4 +1,4 @@
-package com.herron.bitstamp.consumer.server.model;
+package com.herron.bitstamp.consumer.server.messages;
 
 import com.herron.bitstamp.consumer.server.api.BitstampMarketEvent;
 import com.herron.bitstamp.consumer.server.enums.EvenTypeEnum;
