@@ -6,7 +6,6 @@ import com.herron.bitstamp.consumer.server.eventhandler.DefaultEventHandler;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
@@ -42,7 +41,7 @@ public class BitstampConsumerConfig {
             return uri;
         }
 
-        public record SubscriptionDetail(String fxCurrency, String cryptoCurrency, String channel) {
+        public record SubscriptionDetail(String channel) {
         }
 
         public List<SubscriptionDetail> getSubscriptionDetails() {

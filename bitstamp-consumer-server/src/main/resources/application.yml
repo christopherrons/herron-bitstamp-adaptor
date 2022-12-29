@@ -5,15 +5,7 @@ spring:
 subscription-config:
   uri: wss://ws.bitstamp.net
   subscription-details:
-    - fx-currency: eur
-      crypto-currency: btc
-      channel: live_orders
-    - fx-currency: usd
-      crypto-currency: btc
-      channel: live_orders
-    - fx-currency: eur
-      crypto-currency: xrp
-      channel: live_orders
-    - fx-currency: usd
-      crypto-currency: xrp
-      channel: live_orders
+    - channel: live_orders_btceur
+    - channel: live_orders_btcusd
+    - channel: live_orders_xrpeur
+    - channel: live_orders_btcusd

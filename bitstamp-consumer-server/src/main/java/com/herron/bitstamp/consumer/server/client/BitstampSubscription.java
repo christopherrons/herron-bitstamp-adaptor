@@ -21,9 +21,6 @@ public class BitstampSubscription {
     private static final String UNSUBSCRIBE = "bts:unsubscribe";
     private static final String HEART_BEAT = "bts:heartbeat";
     private static final BitstampJsonMessageDecoder BITSTAMP_JSON_MESSAGE_DECODER = new BitstampJsonMessageDecoder(BitstampEventData.class);
-
-    private final String fxCurrency;
-    private final String cryptoCurrency;
     private final String channel;
     private final URI uri;
 
@@ -36,10 +33,8 @@ public class BitstampSubscription {
     private final ScheduledExecutorService heartBeatExecutorService = Executors.newScheduledThreadPool(1);
 
 
-    public BitstampSubscription(EventHandler eventHandler, String fxCurrency, String cryptoCurrency, String channel, String uri) throws DeploymentException, IOException, URISyntaxException {
+    public BitstampSubscription(EventHandler eventHandler, String channel, String uri) throws DeploymentException, IOException, URISyntaxException {
         this.messageHandler = createMessageHandler(eventHandler);
-        this.fxCurrency = fxCurrency;
-        this.cryptoCurrency = cryptoCurrency;
         this.channel = channel;
         this.uri = new URI(uri);
         this.session = createSession();
@@ -85,10 +80,10 @@ public class BitstampSubscription {
                     e.printStackTrace();
                 }
                 timeWaited = timeWaited + timeout;
-                LOGGER.info("Waiting for session to open before subscribing to: {}. Total time waited {}.", createChannel(), timeWaited);
+                LOGGER.info("Waiting for session to open before subscribing to: {}. Total time waited {}.", channel, timeWaited);
             }
 
-            LOGGER.info("Attempting to subscribe to: {}.", createChannel());
+            LOGGER.info("Attempting to subscribe to: {}.", channel);
             RemoteEndpoint.Basic basicRemoteEndpoint = session.getBasicRemote();
             try {
                 basicRemoteEndpoint.sendObject(createSubscriptionJson());
@@ -99,27 +94,27 @@ public class BitstampSubscription {
     }
 
     public void unsubscribe() {
-        LOGGER.info("Attempting to unsubscribe to: {}", createChannel());
+        LOGGER.info("Attempting to unsubscribe to: {}", channel);
         RemoteEndpoint.Basic basicRemoteEndpoint = session.getBasicRemote();
         try {
             basicRemoteEndpoint.sendObject(createUnsubscribeJson());
             isSubscribed = false;
             heartBeatExecutorService.shutdown();
             session.close();
-            LOGGER.info("Successfully unsubscribed to: {} and closed session.", createChannel());
+            LOGGER.info("Successfully unsubscribed to: {} and closed session.", channel);
         } catch (IOException | EncodeException e) {
             e.printStackTrace();
         }
     }
 
     private void startHeartBeats() {
-        LOGGER.info("Starting heartbeats for {}! Session status: {}, isSubscribed status: {}", getTradingPair(), session.isOpen(), isSubscribed);
+        LOGGER.info("Starting heartbeats for {}! Session status: {}, isSubscribed status: {}", channel, session.isOpen(), isSubscribed);
         RemoteEndpoint.Basic basicRemoteEndpoint = session.getBasicRemote();
         heartBeatExecutorService.scheduleAtFixedRate(() -> {
             try {
                 basicRemoteEndpoint.sendObject(createHeartBeatJson());
             } catch (Exception e) {
-                LOGGER.warn("Could not run heartbeat for {}! Session status: {}, isSubscribed status: {}", getTradingPair(), session.isOpen(), isSubscribed);
+                LOGGER.warn("Could not run heartbeat for {}! Session status: {}, isSubscribed status: {}", channel, session.isOpen(), isSubscribed);
                 try {
                     unsubscribe();
                     reconnect();
@@ -131,7 +126,7 @@ public class BitstampSubscription {
     }
 
     private void reconnect() throws DeploymentException, IOException, InterruptedException {
-        LOGGER.info(String.format("Reconnecting to %s in 10 seconds", getTradingPair()));
+        LOGGER.info("Reconnecting to {} in 10 seconds", channel);
         Thread.sleep(1000 * 10L);
         this.session = createSession();
         subscribe();
@@ -141,13 +136,13 @@ public class BitstampSubscription {
         switch (event.getEventDescriptionEnum()) {
             case SUBSCRIPTION_SUCCEEDED -> {
                 isSubscribed = true;
-                LOGGER.info("Successfully subscribed to: {}.", createChannel());
+                LOGGER.info("Successfully subscribed to: {}.", channel);
             }
             case HEART_BEAT -> {
                 if (event.getHeartBeat().isSuccessful()) {
-                    LOGGER.debug("Heartbeat successful {}." + " Session status: {}, isSubscribed status: {}.", getTradingPair(), session.isOpen(), isSubscribed);
+                    LOGGER.debug("Heartbeat successful {}." + " Session status: {}, isSubscribed status: {}.", channel, session.isOpen(), isSubscribed);
                 } else {
-                    LOGGER.warn("Heartbeat NOT successful {}. Event: {}" + " Session status: {}, isSubscribed status: {}.", getTradingPair(), event, session.isOpen(), isSubscribed);
+                    LOGGER.warn("Heartbeat NOT successful {}. Event: {}" + " Session status: {}, isSubscribed status: {}.", channel, event, session.isOpen(), isSubscribed);
                 }
             }
             case FORCED_RECONNECT -> {
@@ -170,19 +165,11 @@ public class BitstampSubscription {
     }
 
     private String createSubscriptionRelatedJson(String subscriptionType) {
-        return Json.createObjectBuilder().add("event", subscriptionType).add("data", Json.createObjectBuilder().add("channel", createChannel())).build().toString();
+        return Json.createObjectBuilder().add("event", subscriptionType).add("data", Json.createObjectBuilder().add("channel", channel)).build().toString();
     }
 
     private String createHeartBeatJson() {
         return Json.createObjectBuilder().add("event", HEART_BEAT).build().toString();
-    }
-
-    private String createChannel() {
-        return String.format("%s_%s", channel, getTradingPair());
-    }
-
-    private String getTradingPair() {
-        return String.format("%s%s", cryptoCurrency, fxCurrency);
     }
 
     public boolean isSubscribed() {

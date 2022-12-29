@@ -29,16 +29,12 @@ format is:
 
 ```yml
 subscription-config:
+  uri: wss://ws.bitstamp.net
   subscription-details:
-    - fx-currency: eur
-      crypto-currency: btc
-      channel: live_orders
-      uri: wss://ws.bitstamp.net
-    - fx-currency: usd
-      crypto-currency: btc
-      channel: live_orders
-      uri: wss://ws.bitstamp.net
-
+    - channel: live_orders_btceur
+    - channel: live_orders_btcusd
+    - channel: live_orders_xrpeur
+    - channel: live_orders_btcusd
 ```
 
 All events are handle by a
