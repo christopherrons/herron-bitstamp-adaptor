@@ -72,6 +72,6 @@ public record BitstampOrder(OrderOperationEnum orderOperation,
 
     @Override
     public String getMessageType() {
-        return "BSOR";
+        return "BSAO";
     }
 }
