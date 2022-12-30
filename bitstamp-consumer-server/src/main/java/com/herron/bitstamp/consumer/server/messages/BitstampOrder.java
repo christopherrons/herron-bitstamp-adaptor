@@ -7,20 +7,21 @@ import com.herron.bitstamp.consumer.server.enums.OrderOperationEnum;
 
 import java.util.Map;
 
-import static com.herron.bitstamp.consumer.server.utils.BitstampUtils.createInstrumentId;
-import static com.herron.bitstamp.consumer.server.utils.BitstampUtils.createOrderbookId;
+import static com.herron.bitstamp.consumer.server.utils.BitstampUtils.*;
 import static com.herron.bitstamp.consumer.server.utils.ParticipantGeneratorUtils.getUserFromPool;
 
 public record BitstampOrder(OrderOperationEnum orderOperation,
                             String participant,
                             String orderId,
-                            int orderType,
+                            int orderSide,
                             double initialVolume,
                             double currentVolume,
                             double price,
                             long timeStampInMs,
                             String instrumentId,
-                            String orderbookId) implements BitstampMarketEvent {
+                            String orderbookId,
+                            String orderExecutionType,
+                            String orderType) implements BitstampMarketEvent {
 
     /*  Json Structure example of Bitstamp Live Order
 {
@@ -48,7 +49,9 @@ public record BitstampOrder(OrderOperationEnum orderOperation,
                 !data.isEmpty() ? Double.parseDouble((String) data.get("price_str")) : -1.0,
                 !data.isEmpty() ? Long.parseLong((String) data.get("microtimestamp")) / 1000 : -1L,
                 createInstrumentId(channel),
-                createOrderbookId(channel)
+                createOrderbookId(channel),
+                generateOrderExecutionType(),
+                generateOrderType()
         );
     }
 
