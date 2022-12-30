@@ -47,7 +47,10 @@ public class DefaultEventHandler implements EventHandler {
     }
 
     private void handleOrder(BitstampOrder order) {
-        if (order.orderOperation() == OrderOperationEnum.CREATE && order.price() < 99_999_999.0) {//|| (order.orderOperation() == OrderOperationEnum.UPDATE && orderIds.contains(order.orderId()))) {
+        if (order.orderOperation() == OrderOperationEnum.CREATE) {//|| (order.orderOperation() == OrderOperationEnum.UPDATE && orderIds.contains(order.orderId()))) {
+            if (order.orderType().equals("limit") && order.price() > 99_999_999.0) {
+                return;
+            }
             // We only handle updates if we have received the initial create
             // orderIds.add(order.orderId());
             publish(order);

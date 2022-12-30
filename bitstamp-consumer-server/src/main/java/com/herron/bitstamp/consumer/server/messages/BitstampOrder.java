@@ -71,6 +71,14 @@ public record BitstampOrder(OrderOperationEnum orderOperation,
     }
 
     @Override
+    public double price() {
+        if (orderType.equals("limit")) {
+            return price;
+        }
+        return orderSide == 0 ? Integer.MAX_VALUE : Integer.MIN_VALUE;
+    }
+
+    @Override
     public String getMessageType() {
         return "BSAO";
     }
