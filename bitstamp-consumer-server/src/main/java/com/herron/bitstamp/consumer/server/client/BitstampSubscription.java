@@ -23,15 +23,10 @@ public class BitstampSubscription {
     private static final BitstampJsonMessageDecoder BITSTAMP_JSON_MESSAGE_DECODER = new BitstampJsonMessageDecoder(BitstampEventData.class);
     private final String channel;
     private final URI uri;
-
     private final MessageHandler messageHandler;
-
     private Session session;
-
     private boolean isSubscribed = false;
-
     private final ScheduledExecutorService heartBeatExecutorService = Executors.newScheduledThreadPool(1);
-
 
     public BitstampSubscription(EventHandler eventHandler, String channel, String uri) throws DeploymentException, IOException, URISyntaxException {
         this.messageHandler = createMessageHandler(eventHandler);
