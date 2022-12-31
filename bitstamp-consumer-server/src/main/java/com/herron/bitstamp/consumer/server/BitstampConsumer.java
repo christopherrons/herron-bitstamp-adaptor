@@ -57,8 +57,10 @@ public class BitstampConsumer {
     }
 
     private void initOrderbook(BitstampConsumerConfig.SubscriptionDetailConfig.SubscriptionDetail detail) {
-        var instrument = new BitstampStockInstrument(createInstrumentId(detail.channel()), detail.channel().split("_")[2].substring(3, 6), Instant.now().toEpochMilli());
-        var orderbook = new BitstampOrderbookData(createOrderbookId(detail.channel()), instrument.instrumentId(), "fifo", Instant.now().toEpochMilli());
+        var instrument = new BitstampStockInstrument(createInstrumentId(detail.channel()), Instant.now().toEpochMilli());
+        String tradingCurrency = detail.channel().split("_")[2].substring(3, 6);
+        var orderbook = new BitstampOrderbookData(createOrderbookId(detail.channel()), instrument.instrumentId(),
+                tradingCurrency.equals("eur") ? "fifo" : "pro-rata", tradingCurrency, 0, Instant.now().toEpochMilli());
         var stateChange = new BitstampStateChange(orderbook.orderbookId(), "continuous trading", Instant.now().toEpochMilli());
         eventHandler.handleEvents(List.of(instrument, orderbook, stateChange));
         LOGGER.info("Init Orderbook for detail complete: {}", detail);
