@@ -69,7 +69,7 @@ public class DefaultEventHandler implements EventHandler {
         }
     }
 
-    private void publish(BitstampMarketEvent event) {
+    private synchronized void publish(BitstampMarketEvent event) {
         var broadCast = new BitstampBroadcastMessage(event, event.getMessageType(), sequenceNumberHandler.getAndIncrement(), Instant.now().toEpochMilli());
         kafkaTemplate.send(TopicEnum.BITSTAMP_MARKET_DATA.getTopicName(), broadCast.getMessageType(), broadCast);
         eventLogging.logEvent();
