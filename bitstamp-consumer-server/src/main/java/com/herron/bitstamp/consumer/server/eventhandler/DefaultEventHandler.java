@@ -24,7 +24,7 @@ public class DefaultEventHandler implements EventHandler {
     private final Set<String> orderIds = new HashSet<>();
     private final Map<String, TimeBoundPriorityQueue<BitstampMarketEvent>> idToEventPriorityQueue = new ConcurrentHashMap<>();
 
-    private final AtomicLong sequenceNumberHandler = new AtomicLong();
+    private final AtomicLong sequenceNumberHandler = new AtomicLong(1);
 
     public DefaultEventHandler(KafkaTemplate<String, Object> kafkaTemplate) {
         this(kafkaTemplate, new EventLogger());
