@@ -24,7 +24,7 @@ public class DefaultEventHandler implements EventHandler {
     private final Set<String> orderIds = new HashSet<>();
     private final Map<String, TimeBoundPriorityQueue<BitstampMarketEvent>> idToEventPriorityQueue = new ConcurrentHashMap<>();
 
-    private final AtomicLong sequenceNumberHandler = new AtomicLong(1);
+    private final Map<Integer, AtomicLong> partitionToSequenceNumberHandler = new ConcurrentHashMap<>();
 
     public DefaultEventHandler(KafkaTemplate<String, Object> kafkaTemplate) {
         this(kafkaTemplate, new EventLogger());
@@ -46,7 +46,6 @@ public class DefaultEventHandler implements EventHandler {
                 case ORDER -> handleOrder((BitstampOrder) event);
                 case TRADE -> handleTrade((BitstampTrade) event);
                 default -> publish(event);
-
             }
         }
     }
@@ -70,16 +69,21 @@ public class DefaultEventHandler implements EventHandler {
     }
 
     private synchronized void publish(BitstampMarketEvent event) {
-        var broadCast = new BitstampBroadcastMessage(event, event.getMessageType(), sequenceNumberHandler.getAndIncrement(), Instant.now().toEpochMilli());
-        kafkaTemplate.send(TopicEnum.BITSTAMP_MARKET_DATA.getTopicName(), broadCast.getMessageType(), broadCast);
+        int partition = TopicEnum.getPartition(event.getId());
+        var broadCast = new BitstampBroadcastMessage(event, event.getMessageType(), getSequenceNumber(partition), Instant.now().toEpochMilli());
+        kafkaTemplate.send(TopicEnum.BITSTAMP_MARKET_DATA.getTopicName(), partition, broadCast.getMessageType(), broadCast);
         eventLogging.logEvent();
     }
 
-    private TimeBoundPriorityQueue<BitstampMarketEvent> findOrCreateQueue(final BitstampMarketEvent event) {
+    private TimeBoundPriorityQueue<BitstampMarketEvent> findOrCreateQueue(BitstampMarketEvent event) {
         return idToEventPriorityQueue.computeIfAbsent(
                 event.getId(),
                 e -> new TimeBoundPriorityQueue<>(TIME_IN_QUEUE_MS, new EventComparator<>())
         );
+    }
+
+    private long getSequenceNumber(int partition) {
+        return partitionToSequenceNumberHandler.computeIfAbsent(partition, k -> new AtomicLong(1)).getAndIncrement();
     }
 
 }

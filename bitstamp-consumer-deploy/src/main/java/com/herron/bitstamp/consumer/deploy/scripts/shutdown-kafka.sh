@@ -18,12 +18,16 @@ function getPid() {
 function killProcess() {
   pid=$1
   echo "Attempting to exit gracefully: kill -SIGTERM $pid"
+    if [ "x$pid" != "x" ]; then
+      rm "$versionFile"
+      exit
+    fi
   kill -SIGTERM "$pid"
 
   isProcessRunningValue=$(isProcessRunning "$pid")
   timeWaitedToShutdown=0
   interval=10
-  maxWaitTime=60
+  maxWaitTime=30
   while [ "$isProcessRunningValue" == "true" ]; do
     if ((timeWaitedToShutdown > maxWaitTime)); then
       echo "Process could not exit gracefully: kill -SIGKILL $pid"

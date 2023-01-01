@@ -12,4 +12,8 @@ public enum TopicEnum {
     public String getTopicName() {
         return topicName;
     }
+
+    public static int getPartition(String currency) {
+        return currency.contains("eur") ? 0 : 1;
+    }
 }

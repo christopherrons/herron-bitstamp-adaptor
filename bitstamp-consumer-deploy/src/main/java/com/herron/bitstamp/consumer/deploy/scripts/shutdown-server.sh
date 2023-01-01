@@ -23,7 +23,7 @@ function killProcess() {
   isProcessRunningValue=$(isProcessRunning "$pid")
   timeWaitedToShutdown=0
   interval=10
-  maxWaitTime=60
+  maxWaitTime=30
   while [ "$isProcessRunningValue" == "true" ]; do
     if ((timeWaitedToShutdown > maxWaitTime)); then
       echo "Process could not exit gracefully: kill -SIGKILL $pid"
