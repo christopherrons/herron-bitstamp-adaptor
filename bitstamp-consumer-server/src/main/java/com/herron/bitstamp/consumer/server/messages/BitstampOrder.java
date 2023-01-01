@@ -2,7 +2,7 @@ package com.herron.bitstamp.consumer.server.messages;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.herron.bitstamp.consumer.server.api.BitstampMarketEvent;
-import com.herron.bitstamp.consumer.server.enums.EvenTypeEnum;
+import com.herron.bitstamp.consumer.server.enums.EventTypeEnum;
 import com.herron.bitstamp.consumer.server.enums.OrderOperationEnum;
 
 import java.util.Map;
@@ -58,18 +58,13 @@ public record BitstampOrder(OrderOperationEnum orderOperation,
     }
 
     @Override
-    public long getTimeStampMs() {
-        return timeStampInMs;
-    }
-
-    @Override
     public String getId() {
         return orderbookId;
     }
 
     @Override
-    public EvenTypeEnum getEventTypeEnum() {
-        return EvenTypeEnum.ORDER;
+    public EventTypeEnum getEventTypeEnum() {
+        return EventTypeEnum.ORDER;
     }
 
     @Override

@@ -1,7 +1,7 @@
 package com.herron.bitstamp.consumer.server.messages;
 
 import com.herron.bitstamp.consumer.server.api.BitstampMarketEvent;
-import com.herron.bitstamp.consumer.server.enums.EvenTypeEnum;
+import com.herron.bitstamp.consumer.server.enums.EventTypeEnum;
 
 public record BitstampStockInstrument(String instrumentId, String instrumentType, long timeStampInMs) implements BitstampMarketEvent {
 
@@ -10,18 +10,13 @@ public record BitstampStockInstrument(String instrumentId, String instrumentType
     }
 
     @Override
-    public long getTimeStampMs() {
-        return timeStampInMs;
-    }
-
-    @Override
     public String getId() {
         return instrumentId;
     }
 
     @Override
-    public EvenTypeEnum getEventTypeEnum() {
-        return EvenTypeEnum.INSTRUMENT;
+    public EventTypeEnum getEventTypeEnum() {
+        return EventTypeEnum.INSTRUMENT;
     }
 
     @Override

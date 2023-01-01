@@ -1,14 +1,14 @@
 package com.herron.bitstamp.consumer.server.api;
 
-import com.herron.bitstamp.consumer.server.enums.EvenTypeEnum;
+import com.herron.bitstamp.consumer.server.enums.EventTypeEnum;
 
 public interface BitstampMarketEvent {
 
-    long getTimeStampMs();
+    long timeStampInMs();
 
     String getId();
 
-    EvenTypeEnum getEventTypeEnum();
+    EventTypeEnum getEventTypeEnum();
 
     String getMessageType();
 }

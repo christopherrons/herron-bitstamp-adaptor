@@ -4,15 +4,18 @@ import com.herron.bitstamp.consumer.server.api.BitstampMarketEvent;
 import com.herron.bitstamp.consumer.server.api.EventHandler;
 import com.herron.bitstamp.consumer.server.enums.OrderOperationEnum;
 import com.herron.bitstamp.consumer.server.enums.TopicEnum;
+import com.herron.bitstamp.consumer.server.messages.BitstampBroadcastMessage;
 import com.herron.bitstamp.consumer.server.messages.BitstampOrder;
 import com.herron.bitstamp.consumer.server.messages.BitstampTrade;
 import org.springframework.kafka.core.KafkaTemplate;
 
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class DefaultEventHandler implements EventHandler {
     private static final int TIME_IN_QUEUE_MS = 10000;
@@ -20,6 +23,8 @@ public class DefaultEventHandler implements EventHandler {
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final Set<String> orderIds = new HashSet<>();
     private final Map<String, TimeBoundPriorityQueue<BitstampMarketEvent>> idToEventPriorityQueue = new ConcurrentHashMap<>();
+
+    private final AtomicLong sequenceNumberHandler = new AtomicLong();
 
     public DefaultEventHandler(KafkaTemplate<String, Object> kafkaTemplate) {
         this(kafkaTemplate, new EventLogger());
@@ -65,7 +70,8 @@ public class DefaultEventHandler implements EventHandler {
     }
 
     private void publish(BitstampMarketEvent event) {
-        kafkaTemplate.send(TopicEnum.BITSTAMP_MARKET_DATA.getTopicName(), event.getMessageType(), event);
+        var broadCast = new BitstampBroadcastMessage(event, event.getMessageType(), sequenceNumberHandler.getAndIncrement(), Instant.now().toEpochMilli());
+        kafkaTemplate.send(TopicEnum.BITSTAMP_MARKET_DATA.getTopicName(), BitstampBroadcastMessage.MESSAGE_TYPE, event);
         eventLogging.logEvent();
     }
 

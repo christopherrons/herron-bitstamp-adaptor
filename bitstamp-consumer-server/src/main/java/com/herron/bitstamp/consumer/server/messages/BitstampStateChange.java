@@ -1,22 +1,17 @@
 package com.herron.bitstamp.consumer.server.messages;
 
 import com.herron.bitstamp.consumer.server.api.BitstampMarketEvent;
-import com.herron.bitstamp.consumer.server.enums.EvenTypeEnum;
+import com.herron.bitstamp.consumer.server.enums.EventTypeEnum;
 
 public record BitstampStateChange(String orderbookId, String stateChange, long timeStampInMs) implements BitstampMarketEvent {
-    @Override
-    public long getTimeStampMs() {
-        return timeStampInMs;
-    }
-
     @Override
     public String getId() {
         return orderbookId;
     }
 
     @Override
-    public EvenTypeEnum getEventTypeEnum() {
-        return EvenTypeEnum.STATE_CHANGE;
+    public EventTypeEnum getEventTypeEnum() {
+        return EventTypeEnum.STATE_CHANGE;
     }
 
     @Override
