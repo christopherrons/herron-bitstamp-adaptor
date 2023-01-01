@@ -12,7 +12,7 @@ public class TimeBoundPriorityQueue<T extends BitstampMarketEvent> extends Prior
     private final transient PriorityQueue<T> timeBoundQueue;
 
     public TimeBoundPriorityQueue(int timeInMs) {
-        this(timeInMs, Comparator.comparing(BitstampMarketEvent::getTimeStampMs));
+        this(timeInMs, Comparator.comparing(BitstampMarketEvent::timeStampInMs));
     }
 
     public TimeBoundPriorityQueue(int timeInMs, Comparator<T> comparator) {
@@ -38,6 +38,6 @@ public class TimeBoundPriorityQueue<T extends BitstampMarketEvent> extends Prior
     }
 
     private boolean isTimeExceeded(final T currentItem, final T item) {
-        return currentItem.getTimeStampMs() - item.getTimeStampMs() > timeInMs;
+        return currentItem.timeStampInMs() - item.timeStampInMs() > timeInMs;
     }
 }
