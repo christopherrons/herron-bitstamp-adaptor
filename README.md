@@ -30,11 +30,11 @@ format is:
 ```yml
 subscription-config:
   uri: wss://ws.bitstamp.net
-  subscription-details:
-    - channel: live_orders_btceur
-    - channel: live_orders_btcusd
-    - channel: live_orders_xrpeur
-    - channel: live_orders_btcusd
+  channels:
+    - live_orders_btceur
+    - live_orders_btcusd
+    - live_orders_xrpeur
+    - live_orders_btcusd
 ```
 
 All events are handle by a

@@ -31,7 +31,7 @@ public class BitstampConsumerConfig {
     public static class SubscriptionDetailConfig {
 
         private String uri;
-        private final List<SubscriptionDetail> subscriptionDetails = new ArrayList<>();
+        private final List<String> channels = new ArrayList<>();
 
         public void setUri(String uri) {
             this.uri = uri;
@@ -41,24 +41,10 @@ public class BitstampConsumerConfig {
             return uri;
         }
 
-        public record SubscriptionDetail(String channel) {
+        public List<String> getChannels() {
+            return channels;
         }
 
-        public List<SubscriptionDetail> getSubscriptionDetails() {
-            return subscriptionDetails;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof SubscriptionDetailConfig that)) return false;
-            return Objects.equals(subscriptionDetails, that.subscriptionDetails);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(subscriptionDetails);
-        }
     }
 
 }

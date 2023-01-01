@@ -25,7 +25,7 @@ public class BitstampConsumer {
     private final EventHandler eventHandler;
     private static final Logger LOGGER = LoggerFactory.getLogger(BitstampConsumer.class);
     private final BitstampConsumerConfig.SubscriptionDetailConfig subscriptionDetailConfig;
-    private final Map<BitstampConsumerConfig.SubscriptionDetailConfig.SubscriptionDetail, BitstampSubscription> keyToSubscription = new ConcurrentHashMap<>();
+    private final Map<String, BitstampSubscription> keyToSubscription = new ConcurrentHashMap<>();
 
     public BitstampConsumer(BitstampConsumerConfig.SubscriptionDetailConfig subscriptionDetailConfig, EventHandler eventHandler) {
         this.subscriptionDetailConfig = subscriptionDetailConfig;
@@ -33,40 +33,40 @@ public class BitstampConsumer {
     }
 
     public void init() {
-        for (var details : subscriptionDetailConfig.getSubscriptionDetails()) {
-            if (keyToSubscription.containsKey(details)) {
-                throw new IllegalArgumentException(String.format("Duplicate subscription detail: %s", details));
+        for (var channel : subscriptionDetailConfig.getChannels()) {
+            if (keyToSubscription.containsKey(channel)) {
+                throw new IllegalArgumentException(String.format("Duplicate subscription detail: %s", channel));
             }
-            initOrderbook(details);
+            initOrderbook(channel);
         }
 
-        for (var details : subscriptionDetailConfig.getSubscriptionDetails()) {
+        for (var channel : subscriptionDetailConfig.getChannels()) {
             try {
                 var subscription = new BitstampSubscription(
                         eventHandler,
-                        details.channel(),
+                        channel,
                         subscriptionDetailConfig.getUri()
                 );
                 subscription.subscribe();
-                keyToSubscription.computeIfAbsent(details, k -> subscription);
+                keyToSubscription.computeIfAbsent(channel, k -> subscription);
 
             } catch (DeploymentException | IOException | URISyntaxException e) {
-                LOGGER.error("Unable to subscribe to channel() {}: {}", details, e);
+                LOGGER.error("Unable to subscribe to channel() {}: {}", channel, e);
             }
         }
     }
 
-    private void initOrderbook(BitstampConsumerConfig.SubscriptionDetailConfig.SubscriptionDetail detail) {
-        var instrument = new BitstampStockInstrument(createInstrumentId(detail.channel()), Instant.now().toEpochMilli());
-        String tradingCurrency = detail.channel().split("_")[2].substring(3, 6);
+    private void initOrderbook(String channel) {
+        var instrument = new BitstampStockInstrument(createInstrumentId(channel), Instant.now().toEpochMilli());
+        String tradingCurrency = channel.split("_")[2].substring(3, 6);
 
-        var orderbook = new BitstampOrderbookData(createOrderbookId(detail.channel()), instrument.instrumentId(),
+        var orderbook = new BitstampOrderbookData(createOrderbookId(channel), instrument.instrumentId(),
                 tradingCurrency.equals("eur") ? "fifo" : "pro-rata", tradingCurrency, 0, Instant.now().toEpochMilli());
 
         var stateChange = new BitstampStateChange(orderbook.orderbookId(), "continuous trading", Instant.now().toEpochMilli());
 
         eventHandler.handleEvents(List.of(instrument, orderbook, stateChange));
-        LOGGER.info("Init Orderbook for detail complete: {}", detail);
+        LOGGER.info("Init Orderbook for detail complete: {}", channel);
     }
 
 }
