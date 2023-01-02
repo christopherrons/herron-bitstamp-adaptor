@@ -51,7 +51,7 @@ public class DefaultMessageHandler implements MessageHandler {
             var messages = queue.addItemThenPurge(message);
             handleMessages(messages, partitionKey);
         } catch (Exception e) {
-            LOGGER.warn("Unable to handle message: {}", message);
+            LOGGER.warn("Unable to handle message: {}. {}", message, e);
         }
 
     }
