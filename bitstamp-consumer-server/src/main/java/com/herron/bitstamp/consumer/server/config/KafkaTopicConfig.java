@@ -1,6 +1,6 @@
 package com.herron.bitstamp.consumer.server.config;
 
-import com.herron.bitstamp.consumer.server.enums.TopicEnum;
+import com.herron.exchange.common.api.common.enums.TopicEnum;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

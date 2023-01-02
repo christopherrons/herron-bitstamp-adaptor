@@ -12,7 +12,15 @@ springBoot {
 // Project Configs
 allprojects {
     repositories {
-        mavenCentral()
+        mavenLocal()
+        maven {
+            name = "bytesafe"
+            url = uri("https://herron.bytesafe.dev/maven/herron/")
+            credentials {
+                username = extra["username"] as String?
+                password = extra["password"] as String?
+            }
+        }
     }
 
     apply(plugin = "maven-publish")
@@ -74,7 +82,7 @@ tasks.register("deployToServer") {
     remotes {
         withGroovyBuilder {
             "create"("webServer") {
-                    setProperty("host", "bitstamp-consumer-1")
+                setProperty("host", "bitstamp-consumer-1")
                 setProperty("user", "herron")
                 setProperty("agent", true)
             }

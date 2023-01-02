@@ -9,7 +9,7 @@ import com.herron.exchange.common.api.common.datastructures.TimeBoundPriorityQue
 import com.herron.exchange.common.api.common.enums.OrderOperationEnum;
 import com.herron.exchange.common.api.common.enums.OrderTypeEnum;
 import com.herron.exchange.common.api.common.logging.EventLogger;
-import com.herron.exchange.common.api.common.messages.herron.HerronBroadcastMessage;
+import com.herron.exchange.common.api.common.messages.HerronBroadcastMessage;
 import com.herron.exchange.common.api.common.model.PartitionKey;
 import org.springframework.kafka.core.KafkaTemplate;
 
