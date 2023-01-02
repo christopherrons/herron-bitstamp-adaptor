@@ -11,6 +11,8 @@ import com.herron.exchange.common.api.common.enums.OrderTypeEnum;
 import com.herron.exchange.common.api.common.logging.EventLogger;
 import com.herron.exchange.common.api.common.messages.HerronBroadcastMessage;
 import com.herron.exchange.common.api.common.model.PartitionKey;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 
 import java.time.Instant;
@@ -22,6 +24,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class DefaultMessageHandler implements MessageHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultMessageHandler.class);
+
     private static final int TIME_IN_QUEUE_MS = 10000;
     private final EventLogger eventLogging;
     private final KafkaTemplate<String, Object> kafkaTemplate;
@@ -43,7 +47,13 @@ public class DefaultMessageHandler implements MessageHandler {
             return;
         }
         TimeBoundPriorityQueue<Message> queue = findOrCreateQueue(partitionKey);
-        handleMessages(queue.addItemThenPurge(message), partitionKey);
+        try {
+            var messages = queue.addItemThenPurge(message);
+            handleMessages(messages, partitionKey);
+        } catch (Exception e) {
+            LOGGER.warn("Unable to handle message: {}", message);
+        }
+
     }
 
     public void handleMessages(List<Message> messages, PartitionKey partitionKey) {
