@@ -7,14 +7,16 @@ import java.time.Instant;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class EventLogger {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(EventLogger.class);
+
+    private static final double MILLI_TO_SEK = 1 / 1000.0;
     private static final int MESSAGE_UPDATE_INTERVAL = 1000;
     private final AtomicLong totalNrOfEvents = new AtomicLong();
     private final Instant startTime = Instant.now();
+    private final String eventLoggDescription;
     private Instant lastLogUpdateTime = Instant.now();
     private AtomicLong lastUpdateTimeNrOfEvents = new AtomicLong();
-
-    private final String eventLoggDescription;
 
     public EventLogger() {
         this("");
@@ -25,20 +27,24 @@ public class EventLogger {
     }
 
     public void logEvent() {
-        if (totalNrOfEvents.incrementAndGet() % MESSAGE_UPDATE_INTERVAL == 0) {
-            Instant currentTime = Instant.now();
-            LOGGER.info(String.format("%s: Messages received: %s. Current event rate %s/s, average event rate %s/s",
-                    eventLoggDescription, totalNrOfEvents.get(), getCurrentEventsPerSecond(currentTime), getAverageEventsPerSecond(currentTime)));
-            lastLogUpdateTime = currentTime;
-            lastUpdateTimeNrOfEvents = new AtomicLong(totalNrOfEvents.get());
+        try {
+            long currentNrOfEvents = totalNrOfEvents.incrementAndGet();
+            if (currentNrOfEvents % MESSAGE_UPDATE_INTERVAL == 0) {
+                Instant currentTime = Instant.now();
+                LOGGER.info("{}: Messages received: {}. Current event rate {}/s, average event rate {}/s",
+                        eventLoggDescription, totalNrOfEvents.get(), (long) getCurrentEventsPerSecond(currentTime), (long) getAverageEventsPerSecond(currentTime));
+                lastLogUpdateTime = currentTime;
+                lastUpdateTimeNrOfEvents = new AtomicLong(currentNrOfEvents);
+            }
+        } catch (ArithmeticException ignore) {
         }
     }
 
-    private long getCurrentEventsPerSecond(final Instant currentTime) {
-        return (totalNrOfEvents.get() - lastUpdateTimeNrOfEvents.get()) / currentTime.minusMillis((lastLogUpdateTime.toEpochMilli())).getEpochSecond();
+    private double getCurrentEventsPerSecond(Instant currentTime) {
+        return (totalNrOfEvents.get() - lastUpdateTimeNrOfEvents.get()) / (MILLI_TO_SEK * (currentTime.toEpochMilli() - lastLogUpdateTime.toEpochMilli()));
     }
 
-    private long getAverageEventsPerSecond(final Instant currentTime) {
-        return totalNrOfEvents.get() / currentTime.minusMillis((startTime.toEpochMilli())).getEpochSecond();
+    private double getAverageEventsPerSecond(Instant currentTime) {
+        return totalNrOfEvents.get() / (MILLI_TO_SEK * (currentTime.toEpochMilli() - startTime.toEpochMilli()));
     }
 }
