@@ -5,7 +5,7 @@ import com.herron.bitstamp.consumer.server.messages.BitstampOrder;
 import com.herron.bitstamp.consumer.server.messages.BitstampTrade;
 import com.herron.exchange.common.api.common.api.Message;
 import com.herron.exchange.common.api.common.comparator.MessageComparator;
-import com.herron.exchange.common.api.common.datastructures.TimeBoundPriorityQueue;
+import com.herron.exchange.common.api.common.datastructures.TimeBoundBlockingPriorityQueue;
 import com.herron.exchange.common.api.common.enums.OrderOperationEnum;
 import com.herron.exchange.common.api.common.enums.OrderTypeEnum;
 import com.herron.exchange.common.api.common.logging.EventLogger;
@@ -25,12 +25,11 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class DefaultMessageHandler implements MessageHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultMessageHandler.class);
-
     private static final int TIME_IN_QUEUE_MS = 10000;
     private final EventLogger eventLogging;
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final Set<String> orderIds = new HashSet<>();
-    private final Map<PartitionKey, TimeBoundPriorityQueue<Message>> partitionKeyToEventPriorityQueue = new ConcurrentHashMap<>();
+    private final Map<PartitionKey, TimeBoundBlockingPriorityQueue<Message>> partitionKeyToEventPriorityQueue = new ConcurrentHashMap<>();
     private final Map<PartitionKey, AtomicLong> partitionKeyToSequenceNumberHandler = new ConcurrentHashMap<>();
 
     public DefaultMessageHandler(KafkaTemplate<String, Object> kafkaTemplate) {
@@ -46,14 +45,13 @@ public class DefaultMessageHandler implements MessageHandler {
         if (message == null) {
             return;
         }
-        TimeBoundPriorityQueue<Message> queue = findOrCreateQueue(partitionKey);
+        TimeBoundBlockingPriorityQueue<Message> queue = findOrCreateQueue(partitionKey);
         try {
             var messages = queue.addItemThenPurge(message);
             handleMessages(messages, partitionKey);
         } catch (Exception e) {
             LOGGER.warn("Unable to handle message: {}. {}", message, e);
         }
-
     }
 
     public void handleMessages(List<Message> messages, PartitionKey partitionKey) {
@@ -96,10 +94,10 @@ public class DefaultMessageHandler implements MessageHandler {
         eventLogging.logEvent();
     }
 
-    private TimeBoundPriorityQueue<Message> findOrCreateQueue(PartitionKey partitionKey) {
+    private TimeBoundBlockingPriorityQueue<Message> findOrCreateQueue(PartitionKey partitionKey) {
         return partitionKeyToEventPriorityQueue.computeIfAbsent(
                 partitionKey,
-                e -> new TimeBoundPriorityQueue<>(TIME_IN_QUEUE_MS, new MessageComparator<>())
+                e -> new TimeBoundBlockingPriorityQueue<>(TIME_IN_QUEUE_MS, new MessageComparator<>())
         );
     }
 
