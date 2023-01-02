@@ -15,8 +15,10 @@ import javax.websocket.DeploymentException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.herron.bitstamp.consumer.server.utils.BitstampUtils.*;
@@ -34,10 +36,12 @@ public class BitstampConsumer {
     }
 
     public void init() {
+        Set<String> processedChannels = new HashSet<>();
         for (var channel : subscriptionDetailConfig.getChannels()) {
-            if (keyToSubscription.containsKey(channel)) {
+            if (processedChannels.contains(channel)) {
                 throw new IllegalArgumentException(String.format("Duplicate subscription detail: %s", channel));
             }
+            processedChannels.add(channel);
             initOrderbook(channel);
         }
 
