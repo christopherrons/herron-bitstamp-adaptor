@@ -11,4 +11,4 @@ subscription-config:
     - live_orders_btceur
     - live_orders_btcusd
     - live_orders_xrpeur
-    - live_orders_btcusd
+    - live_orders_xrpusd
