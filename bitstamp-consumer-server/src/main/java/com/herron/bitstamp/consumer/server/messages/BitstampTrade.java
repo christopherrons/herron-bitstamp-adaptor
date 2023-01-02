@@ -1,26 +1,27 @@
 package com.herron.bitstamp.consumer.server.messages;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.herron.bitstamp.consumer.server.api.BitstampMarketEvent;
-import com.herron.bitstamp.consumer.server.enums.EventTypeEnum;
+import com.herron.exchange.common.api.common.api.Message;
+import com.herron.exchange.common.api.common.api.Trade;
+import com.herron.exchange.common.api.common.enums.MessageTypesEnum;
+import com.herron.exchange.common.api.common.model.MonetaryAmount;
+import com.herron.exchange.common.api.common.model.Participant;
 
 import java.util.Map;
 
-import static com.herron.bitstamp.consumer.server.utils.BitstampUtils.createInstrumentId;
-import static com.herron.bitstamp.consumer.server.utils.BitstampUtils.createOrderbookId;
-import static com.herron.bitstamp.consumer.server.utils.ParticipantGeneratorUtils.getUserFromPool;
+import static com.herron.bitstamp.consumer.server.utils.BitstampUtils.*;
 
-public record BitstampTrade(String bidParticipant,
-                            String askParticipant,
-                            long tradeId,
+public record BitstampTrade(Participant bidParticipant,
+                            Participant askParticipant,
+                            String tradeId,
                             String buyOrderId,
                             String askOrderId,
                             boolean isBidSideAggressor,
                             double volume,
-                            double price,
+                            MonetaryAmount monetaryAmount,
                             long timeStampInMs,
                             String instrumentId,
-                            String orderbookId) implements BitstampMarketEvent {
+                            String orderbookId) implements Trade {
 
     /*  Json Structure example of Bitstamp Live Trade
  {
@@ -40,32 +41,47 @@ public record BitstampTrade(String bidParticipant,
     "event":"trade"
  }*/
     public BitstampTrade(@JsonProperty("data") Map<String, Object> data, @JsonProperty("channel") String channel, @JsonProperty("event") String event) {
-        this(String.format("Bitstamp;%s", getUserFromPool()),
-                String.format("Bitstamp;%s", getUserFromPool()),
-                !data.isEmpty() ? (int) data.get("id") : -1,
+        this(generateParticipant(),
+                generateParticipant(),
+                !data.isEmpty() ? (String) data.get("id") : "-1",
                 !data.isEmpty() ? (String) data.get("buy_order_id") : "NONE",
                 !data.isEmpty() ? (String) data.get("sell_order_id") : "NONE",
                 !data.isEmpty() && (int) data.get("type") == 0,
                 !data.isEmpty() ? Double.parseDouble((String) data.get("amount_str")) : -1.0,
-                !data.isEmpty() ? Double.parseDouble((String) data.get("price_str")) : -1.0,
+                !data.isEmpty() ? new MonetaryAmount(Double.parseDouble((String) data.get("price_str")), channel.split("_")[2].substring(3, 6)) : new MonetaryAmount(0.0, channel.split("_")[2].substring(3, 6)),
                 !data.isEmpty() ? Long.parseLong((String) data.get("microtimestamp")) / 1000 : -1L,
                 createInstrumentId(channel),
                 createOrderbookId(channel)
         );
     }
 
+    public BitstampTrade(Trade trade) {
+        this(trade.bidParticipant(),
+                trade.askParticipant(),
+                trade.tradeId(),
+                trade.buyOrderId(),
+                trade.askOrderId(),
+                trade.isBidSideAggressor(),
+                trade.volume(),
+                trade.monetaryAmount(),
+                trade.timeStampInMs(),
+                trade.instrumentId(),
+                trade.orderbookId());
+    }
+
+
     @Override
-    public String getId() {
-        return orderbookId;
+    public Message getCopy() {
+        return null;
     }
 
     @Override
-    public EventTypeEnum getEventTypeEnum() {
-        return EventTypeEnum.TRADE;
+    public MessageTypesEnum messageType() {
+        return MessageTypesEnum.BITSTAMP_TRADE;
     }
 
     @Override
-    public String getMessageType() {
-        return "BSTR";
+    public double price() {
+        return monetaryAmount.value();
     }
 }

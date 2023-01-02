@@ -1,8 +1,8 @@
 package com.herron.bitstamp.consumer.server.config;
 
 import com.herron.bitstamp.consumer.server.BitstampConsumer;
-import com.herron.bitstamp.consumer.server.api.EventHandler;
-import com.herron.bitstamp.consumer.server.eventhandler.DefaultEventHandler;
+import com.herron.bitstamp.consumer.server.api.MessageHandler;
+import com.herron.bitstamp.consumer.server.messagehandler.DefaultMessageHandler;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -16,13 +16,13 @@ import java.util.List;
 @Configuration
 public class BitstampConsumerConfig {
     @Bean
-    public EventHandler eventHandler(KafkaTemplate<String, Object> kafkaTemplate) {
-        return new DefaultEventHandler(kafkaTemplate);
+    public MessageHandler eventHandler(KafkaTemplate<String, Object> kafkaTemplate) {
+        return new DefaultMessageHandler(kafkaTemplate);
     }
 
     @Bean(initMethod = "init")
-    public BitstampConsumer bitstampConsumer(SubscriptionDetailConfig subscriptionDetailConfig, EventHandler eventHandler, NewTopic bitstampMarketDataTopic) {
-        return new BitstampConsumer(subscriptionDetailConfig, eventHandler);
+    public BitstampConsumer bitstampConsumer(SubscriptionDetailConfig subscriptionDetailConfig, MessageHandler messageHandler, NewTopic bitstampMarketDataTopic) {
+        return new BitstampConsumer(subscriptionDetailConfig, messageHandler);
     }
 
     @Component

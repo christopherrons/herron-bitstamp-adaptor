@@ -1,27 +1,36 @@
 package com.herron.bitstamp.consumer.server.messages;
 
-import com.herron.bitstamp.consumer.server.api.BitstampMarketEvent;
-import com.herron.bitstamp.consumer.server.enums.EventTypeEnum;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.herron.exchange.common.api.common.api.Message;
+import com.herron.exchange.common.api.common.api.OrderbookData;
+import com.herron.exchange.common.api.common.enums.MatchingAlgorithmEnum;
+import com.herron.exchange.common.api.common.enums.MessageTypesEnum;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public record BitstampOrderbookData(String orderbookId,
                                     String instrumentId,
-                                    String matchingAlgorithm,
+                                    MatchingAlgorithmEnum matchingAlgorithm,
                                     String tradingCurrency,
                                     double minTradeVolume,
-                                    long timeStampInMs) implements BitstampMarketEvent {
+                                    long timeStampInMs) implements OrderbookData {
 
-    @Override
-    public String getId() {
-        return orderbookId;
+    public BitstampOrderbookData(BitstampOrderbookData orderbookData) {
+        this(orderbookData.orderbookId(),
+                orderbookData.instrumentId(),
+                orderbookData.matchingAlgorithm(),
+                orderbookData.tradingCurrency(),
+                orderbookData.minTradeVolume(),
+                orderbookData.timeStampInMs());
     }
 
     @Override
-    public EventTypeEnum getEventTypeEnum() {
-        return EventTypeEnum.ORDERBOOK;
+    public Message getCopy() {
+        return new BitstampOrderbookData(this);
     }
 
     @Override
-    public String getMessageType() {
-        return "BSOB";
+    public MessageTypesEnum messageType() {
+        return MessageTypesEnum.BITSTAMP_ORDERBOOK_DATA;
     }
+
 }

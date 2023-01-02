@@ -35,6 +35,10 @@ dependencies {
     //Project Modules
     implementation(project(":bitstamp-consumer-server"))
 
+    // Internal Libs
+    implementation(libs.common.api)
+    implementation(libs.common)
+
     // External Libs
     implementation(libs.spring.boot.starter.web)
     implementation(libs.spring.boot.starter.parent)

@@ -1,21 +1,31 @@
 package com.herron.bitstamp.consumer.server.messages;
 
-import com.herron.bitstamp.consumer.server.api.BitstampMarketEvent;
-import com.herron.bitstamp.consumer.server.enums.EventTypeEnum;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.herron.exchange.common.api.common.api.Message;
+import com.herron.exchange.common.api.common.api.StateChange;
+import com.herron.exchange.common.api.common.enums.MessageTypesEnum;
+import com.herron.exchange.common.api.common.enums.StateChangeTypeEnum;
 
-public record BitstampStateChange(String orderbookId, String stateChange, long timeStampInMs) implements BitstampMarketEvent {
-    @Override
-    public String getId() {
-        return orderbookId;
+@JsonIgnoreProperties(ignoreUnknown = true)
+public record BitstampStateChange(String orderbookId,
+                                  StateChangeTypeEnum stateChangeType,
+                                  @JsonProperty("timeStampInMs") long timeStampInMs) implements StateChange {
+
+    public BitstampStateChange(BitstampStateChange stateChange) {
+        this(stateChange.orderbookId(),
+                stateChange.stateChangeType(),
+                stateChange.timeStampInMs());
     }
 
     @Override
-    public EventTypeEnum getEventTypeEnum() {
-        return EventTypeEnum.STATE_CHANGE;
+    public Message getCopy() {
+        return new BitstampStateChange(this);
     }
 
     @Override
-    public String getMessageType() {
-        return "BSSC";
+    public MessageTypesEnum messageType() {
+        return MessageTypesEnum.BITSTAMP_STATE_CHANGE;
     }
+
 }

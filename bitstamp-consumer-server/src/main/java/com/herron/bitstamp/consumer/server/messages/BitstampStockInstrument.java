@@ -1,26 +1,32 @@
 package com.herron.bitstamp.consumer.server.messages;
 
-import com.herron.bitstamp.consumer.server.api.BitstampMarketEvent;
-import com.herron.bitstamp.consumer.server.enums.EventTypeEnum;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.herron.exchange.common.api.common.api.Instrument;
+import com.herron.exchange.common.api.common.enums.InstrumentTypeEnum;
+import com.herron.exchange.common.api.common.enums.MessageTypesEnum;
 
-public record BitstampStockInstrument(String instrumentId, String instrumentType, long timeStampInMs) implements BitstampMarketEvent {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public record BitstampStockInstrument(String instrumentId,
+                                      long timeStampInMs) implements Instrument {
 
-    public BitstampStockInstrument(String instrumentId,  long timeStampInMs) {
-        this(instrumentId, "stock", timeStampInMs);
+    public BitstampStockInstrument(BitstampStockInstrument instrument) {
+        this(instrument.instrumentId(),
+                instrument.timeStampInMs());
     }
 
     @Override
-    public String getId() {
-        return instrumentId;
+    public BitstampStockInstrument getCopy() {
+        return new BitstampStockInstrument(this);
     }
 
     @Override
-    public EventTypeEnum getEventTypeEnum() {
-        return EventTypeEnum.INSTRUMENT;
+    public MessageTypesEnum messageType() {
+        return MessageTypesEnum.BITSTAMP_STOCK_INSTRUMENT;
     }
 
     @Override
-    public String getMessageType() {
-        return "BSSI";
+    public InstrumentTypeEnum instrumentType() {
+        return InstrumentTypeEnum.STOCK;
     }
+
 }

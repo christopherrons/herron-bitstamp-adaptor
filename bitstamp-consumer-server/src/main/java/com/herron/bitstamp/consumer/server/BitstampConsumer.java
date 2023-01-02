@@ -1,11 +1,13 @@
 package com.herron.bitstamp.consumer.server;
 
-import com.herron.bitstamp.consumer.server.api.EventHandler;
+import com.herron.bitstamp.consumer.server.api.MessageHandler;
 import com.herron.bitstamp.consumer.server.client.BitstampSubscription;
 import com.herron.bitstamp.consumer.server.config.BitstampConsumerConfig;
 import com.herron.bitstamp.consumer.server.messages.BitstampOrderbookData;
 import com.herron.bitstamp.consumer.server.messages.BitstampStateChange;
 import com.herron.bitstamp.consumer.server.messages.BitstampStockInstrument;
+import com.herron.exchange.common.api.common.enums.MatchingAlgorithmEnum;
+import com.herron.exchange.common.api.common.enums.StateChangeTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,19 +19,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.herron.bitstamp.consumer.server.utils.BitstampUtils.createInstrumentId;
-import static com.herron.bitstamp.consumer.server.utils.BitstampUtils.createOrderbookId;
+import static com.herron.bitstamp.consumer.server.utils.BitstampUtils.*;
 
 public class BitstampConsumer {
 
-    private final EventHandler eventHandler;
+    private final MessageHandler messageHandler;
     private static final Logger LOGGER = LoggerFactory.getLogger(BitstampConsumer.class);
     private final BitstampConsumerConfig.SubscriptionDetailConfig subscriptionDetailConfig;
     private final Map<String, BitstampSubscription> keyToSubscription = new ConcurrentHashMap<>();
 
-    public BitstampConsumer(BitstampConsumerConfig.SubscriptionDetailConfig subscriptionDetailConfig, EventHandler eventHandler) {
+    public BitstampConsumer(BitstampConsumerConfig.SubscriptionDetailConfig subscriptionDetailConfig, MessageHandler messageHandler) {
         this.subscriptionDetailConfig = subscriptionDetailConfig;
-        this.eventHandler = eventHandler;
+        this.messageHandler = messageHandler;
     }
 
     public void init() {
@@ -43,7 +44,7 @@ public class BitstampConsumer {
         for (var channel : subscriptionDetailConfig.getChannels()) {
             try {
                 var subscription = new BitstampSubscription(
-                        eventHandler,
+                        messageHandler,
                         channel,
                         subscriptionDetailConfig.getUri()
                 );
@@ -61,11 +62,11 @@ public class BitstampConsumer {
         String tradingCurrency = channel.split("_")[2].substring(3, 6);
 
         var orderbook = new BitstampOrderbookData(createOrderbookId(channel), instrument.instrumentId(),
-                tradingCurrency.equals("eur") ? "fifo" : "pro-rata", tradingCurrency, 0, Instant.now().toEpochMilli());
+                tradingCurrency.equals("eur") ? MatchingAlgorithmEnum.FIFO : MatchingAlgorithmEnum.PRO_RATA, tradingCurrency, 0, Instant.now().toEpochMilli());
 
-        var stateChange = new BitstampStateChange(orderbook.orderbookId(), "continuous trading", Instant.now().toEpochMilli());
+        var stateChange = new BitstampStateChange(orderbook.orderbookId(), StateChangeTypeEnum.CONTINUOUS_TRADING, Instant.now().toEpochMilli());
 
-        eventHandler.handleEvents(List.of(instrument, orderbook, stateChange));
+        messageHandler.handleEvents(List.of(instrument, orderbook, stateChange), getPartitionKey(channel));
         LOGGER.info("Init Orderbook for detail complete: {}", channel);
     }
 

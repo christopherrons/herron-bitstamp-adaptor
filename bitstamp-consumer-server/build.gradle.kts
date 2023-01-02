@@ -7,6 +7,10 @@ dependencies {
     implementation(libs.javafaker)
     implementation(libs.spring.kafka)
 
+    // Internal Libs
+    implementation(libs.common.api)
+    implementation(libs.common)
+
     // External Test Libs
     testImplementation(testlibs.junit.jupiter.api)
     testImplementation(testlibs.junit.jupiter.engine)

@@ -37,9 +37,9 @@ subscription-config:
     - live_orders_btcusd
 ```
 
-All events are handle by a
-default [Event Handler](bitstamp-consumer-server/src/main/java/com/herron/bitstamp/consumer/server/eventhandler/DefaultEventHandler.java)
-which sends the events to a `Kafka` broker. The Event Handler bean
+All massages are handled by a
+default [Message Handler](bitstamp-consumer-server/src/main/java/com/herron/bitstamp/consumer/server/messagehandler/DefaultMessageHandler.java)
+which sends the messages to a `Kafka` broker. The Message Handler bean
 can be overriden to alter this behavior.
 
 ## Application DevOps

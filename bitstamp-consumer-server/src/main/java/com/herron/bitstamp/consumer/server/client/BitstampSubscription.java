@@ -1,6 +1,6 @@
 package com.herron.bitstamp.consumer.server.client;
 
-import com.herron.bitstamp.consumer.server.api.EventHandler;
+import com.herron.bitstamp.consumer.server.api.MessageHandler;
 import com.herron.bitstamp.consumer.server.messages.BitstampEventData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +15,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static com.herron.bitstamp.consumer.server.utils.BitstampUtils.getPartitionKey;
+
 public class BitstampSubscription {
     private static final Logger LOGGER = LoggerFactory.getLogger(BitstampSubscription.class);
     private static final String SUBSCRIBE = "bts:subscribe";
@@ -23,26 +25,26 @@ public class BitstampSubscription {
     private static final BitstampJsonMessageDecoder BITSTAMP_JSON_MESSAGE_DECODER = new BitstampJsonMessageDecoder(BitstampEventData.class);
     private final String channel;
     private final URI uri;
-    private final MessageHandler messageHandler;
+    private final javax.websocket.MessageHandler messageHandler;
     private Session session;
     private boolean isSubscribed = false;
     private final ScheduledExecutorService heartBeatExecutorService = Executors.newScheduledThreadPool(1);
 
-    public BitstampSubscription(EventHandler eventHandler, String channel, String uri) throws DeploymentException, IOException, URISyntaxException {
-        this.messageHandler = createMessageHandler(eventHandler);
+    public BitstampSubscription(MessageHandler messageHandler, String channel, String uri) throws DeploymentException, IOException, URISyntaxException {
+        this.messageHandler = createMessageHandler(messageHandler);
         this.channel = channel;
         this.uri = new URI(uri);
         this.session = createSession();
         startHeartBeats();
     }
 
-    private MessageHandler createMessageHandler(EventHandler eventHandler) {
-        return new MessageHandler.Whole<String>() {
+    private javax.websocket.MessageHandler createMessageHandler(MessageHandler messageHandler) {
+        return new javax.websocket.MessageHandler.Whole<String>() {
             @Override
             public void onMessage(String message) {
                 BitstampEventData event = BITSTAMP_JSON_MESSAGE_DECODER.decodeMessage(message);
                 if (event.getEventDescriptionEnum() != null) {
-                    handleEvent(event, eventHandler);
+                    handleEvent(event, messageHandler);
                 } else {
                     LOGGER.info("Message: {} not decode-able.", message);
                 }
@@ -127,7 +129,7 @@ public class BitstampSubscription {
         subscribe();
     }
 
-    private void handleEvent(BitstampEventData event, EventHandler eventHandler) {
+    private void handleEvent(BitstampEventData event, MessageHandler messageHandler) {
         switch (event.getEventDescriptionEnum()) {
             case SUBSCRIPTION_SUCCEEDED -> {
                 isSubscribed = true;
@@ -145,8 +147,8 @@ public class BitstampSubscription {
                 isSubscribed = false;
                 subscribe();
             }
-            case ORDER_CREATED, ORDER_DELETED, ORDER_UPDATED -> eventHandler.handleEvent(event.getOrder());
-            case TRADE -> eventHandler.handleEvent(event.getTrade());
+            case ORDER_CREATED, ORDER_DELETED, ORDER_UPDATED -> messageHandler.handleEvent(event.getOrder(), getPartitionKey(event.channel()));
+            case TRADE -> messageHandler.handleEvent(event.getTrade(), getPartitionKey(event.channel()));
             default -> LOGGER.warn("Unhandled Bitstamp event received {}: ", event);
         }
     }

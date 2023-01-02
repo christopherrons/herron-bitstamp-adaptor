@@ -1,28 +1,29 @@
 package com.herron.bitstamp.consumer.server.messages;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.herron.bitstamp.consumer.server.api.BitstampMarketEvent;
-import com.herron.bitstamp.consumer.server.enums.EventTypeEnum;
-import com.herron.bitstamp.consumer.server.enums.OrderOperationEnum;
+import com.herron.exchange.common.api.common.api.Message;
+import com.herron.exchange.common.api.common.api.Order;
+import com.herron.exchange.common.api.common.enums.*;
+import com.herron.exchange.common.api.common.model.MonetaryAmount;
+import com.herron.exchange.common.api.common.model.Participant;
 
 import java.util.Map;
 
 import static com.herron.bitstamp.consumer.server.utils.BitstampUtils.*;
-import static com.herron.bitstamp.consumer.server.utils.ParticipantGeneratorUtils.getUserFromPool;
+import static com.herron.exchange.common.api.common.enums.MessageTypesEnum.*;
 
 public record BitstampOrder(OrderOperationEnum orderOperation,
-                            String participant,
+                            Participant participant,
                             String orderId,
-                            int orderSide,
+                            OrderSideEnum orderSide,
                             double initialVolume,
                             double currentVolume,
-                            double price,
-                            String currency,
+                            MonetaryAmount monetaryAmount,
                             long timeStampInMs,
                             String instrumentId,
                             String orderbookId,
-                            String orderExecutionType,
-                            String orderType) implements BitstampMarketEvent {
+                            OrderExecutionTypeEnum orderExecutionType,
+                            OrderTypeEnum orderType) implements Order {
 
     /*  Json Structure example of Bitstamp Live Order
 {
@@ -42,13 +43,12 @@ public record BitstampOrder(OrderOperationEnum orderOperation,
  }*/
     public BitstampOrder(@JsonProperty("data") Map<String, Object> data, @JsonProperty("channel") String channel, @JsonProperty("event") String event) {
         this(OrderOperationEnum.extractValue(event),
-                String.format("Bitstamp;%s", getUserFromPool()),
+                generateParticipant(),
                 !data.isEmpty() ? (String) data.get("id_str") : "NONE",
-                !data.isEmpty() ? (int) data.get("order_type") : -1,
+                !data.isEmpty() ? OrderSideEnum.fromValue((int) data.get("order_type")) : OrderSideEnum.INVALID_ORDER_SIDE,
                 !data.isEmpty() ? Double.parseDouble((String) data.get("amount_str")) : -1.0,
                 !data.isEmpty() ? Double.parseDouble((String) data.get("amount_str")) : -1.0,
-                !data.isEmpty() ? Double.parseDouble((String) data.get("price_str")) : -1.0,
-                channel.split("_")[2].substring(3, 6),
+                !data.isEmpty() ? new MonetaryAmount(Double.parseDouble((String) data.get("price_str")), channel.split("_")[2].substring(3, 6)) : new MonetaryAmount(0.0, channel.split("_")[2].substring(3, 6)),
                 !data.isEmpty() ? Long.parseLong((String) data.get("microtimestamp")) / 1000 : -1L,
                 createInstrumentId(channel),
                 createOrderbookId(channel),
@@ -57,26 +57,41 @@ public record BitstampOrder(OrderOperationEnum orderOperation,
         );
     }
 
-    @Override
-    public String getId() {
-        return orderbookId;
-    }
-
-    @Override
-    public EventTypeEnum getEventTypeEnum() {
-        return EventTypeEnum.ORDER;
+    public BitstampOrder(Order order) {
+        this(order.orderOperation(),
+                order.participant(),
+                order.orderId(),
+                order.orderSide(),
+                order.initialVolume(),
+                order.currentVolume(),
+                order.monetaryAmount(),
+                order.timeStampInMs(),
+                order.instrumentId(),
+                order.orderbookId(),
+                order.orderExecutionType(),
+                order.orderType());
     }
 
     @Override
     public double price() {
         if (orderType.equals("limit")) {
-            return price;
+            return monetaryAmount.value();
         }
-        return orderSide == 0 ? Integer.MAX_VALUE : Integer.MIN_VALUE;
+        return orderSide == OrderSideEnum.BID ? Integer.MAX_VALUE : Integer.MIN_VALUE;
     }
 
     @Override
-    public String getMessageType() {
-        return "BSAO";
+    public Message getCopy() {
+        return new BitstampOrder(this);
+    }
+
+    @Override
+    public MessageTypesEnum messageType() {
+        return switch (orderOperation) {
+            case CREATE -> BITSTAMP_ADD_ORDER;
+            case UPDATE -> BITSTAMP_UPDATE_ORDER;
+            case DELETE -> BITSTAMP_CANCEL_ORDER;
+            default -> INVALID_MESSAGE_TYPE;
+        };
     }
 }
