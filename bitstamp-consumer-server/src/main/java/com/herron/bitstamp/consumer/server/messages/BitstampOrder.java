@@ -74,7 +74,7 @@ public record BitstampOrder(OrderOperationEnum orderOperation,
 
     @Override
     public double price() {
-        if (orderType.equals("limit")) {
+        if (orderType == OrderTypeEnum.LIMIT) {
             return monetaryAmount.value();
         }
         return orderSide == OrderSideEnum.BID ? Integer.MAX_VALUE : Integer.MIN_VALUE;
