@@ -1,11 +1,16 @@
 package com.herron.bitstamp.consumer.server.messages;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.herron.bitstamp.consumer.server.client.BitstampSubscription;
 import com.herron.bitstamp.consumer.server.enums.EventDescriptionEnum;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
 public record BitstampEventData(@JsonProperty("data") Map<String, Object> data, @JsonProperty("channel") String channel, @JsonProperty("event") String event) {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BitstampSubscription.class);
 
     public EventDescriptionEnum getEventDescriptionEnum() {
         return EventDescriptionEnum.getEventDescriptionEnum(event);
@@ -15,7 +20,7 @@ public record BitstampEventData(@JsonProperty("data") Map<String, Object> data, 
         return data;
     }
 
-    public String getchannel() {
+    public String getChannel() {
         return channel;
     }
 
@@ -24,15 +29,30 @@ public record BitstampEventData(@JsonProperty("data") Map<String, Object> data, 
     }
 
     public BitstampOrder getOrder() {
-        return new BitstampOrder(data, channel, event);
+        try {
+            return new BitstampOrder(data, channel, event);
+        } catch (Exception e) {
+            LOGGER.warn("Unable to parse Order: Data: {}, Channel: {}, Event: {}", data, channel, event);
+            return null;
+        }
     }
 
     public BitstampTrade getTrade() {
-        return new BitstampTrade(data, channel, event);
+        try {
+            return new BitstampTrade(data, channel, event);
+        } catch (Exception e) {
+            LOGGER.warn("Unable to parse Trade: Data: {}, Channel: {}, Event: {}", data, channel, event);
+            return null;
+        }
     }
 
-    public BitstampHeartbeat getHeartBeat() {
-        return new BitstampHeartbeat(data, channel, event);
+    public boolean isHeartbeatSuccessful() {
+        try {
+            return new BitstampHeartbeat(data, channel, event).isSuccessful();
+        } catch (Exception e) {
+            LOGGER.warn("Unable to parse Heartbeat: Data: {}, Channel: {}, Event: {}", data, channel, event);
+            return false;
+        }
     }
 
     @Override

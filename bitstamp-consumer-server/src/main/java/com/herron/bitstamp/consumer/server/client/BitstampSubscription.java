@@ -136,7 +136,7 @@ public class BitstampSubscription {
                 LOGGER.info("Successfully subscribed to: {}.", channel);
             }
             case HEART_BEAT -> {
-                if (event.getHeartBeat().isSuccessful()) {
+                if (event.isHeartbeatSuccessful()) {
                     LOGGER.debug("Heartbeat successful {}." + " Session status: {}, isSubscribed status: {}.", channel, session.isOpen(), isSubscribed);
                 } else {
                     LOGGER.warn("Heartbeat NOT successful {}. Event: {}" + " Session status: {}, isSubscribed status: {}.", channel, event, session.isOpen(), isSubscribed);
@@ -147,8 +147,8 @@ public class BitstampSubscription {
                 isSubscribed = false;
                 subscribe();
             }
-            case ORDER_CREATED, ORDER_DELETED, ORDER_UPDATED -> messageHandler.handleEvent(event.getOrder(), getPartitionKey(event.channel()));
-            case TRADE -> messageHandler.handleEvent(event.getTrade(), getPartitionKey(event.channel()));
+            case ORDER_CREATED, ORDER_DELETED, ORDER_UPDATED -> messageHandler.handleMessage(event.getOrder(), getPartitionKey(event.channel()));
+            case TRADE -> messageHandler.handleMessage(event.getTrade(), getPartitionKey(event.channel()));
             default -> LOGGER.warn("Unhandled Bitstamp event received {}: ", event);
         }
     }

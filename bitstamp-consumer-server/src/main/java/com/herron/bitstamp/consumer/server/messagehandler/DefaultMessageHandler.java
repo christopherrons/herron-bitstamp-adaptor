@@ -38,19 +38,26 @@ public class DefaultMessageHandler implements MessageHandler {
         this.eventLogging = eventLogging;
     }
 
-    public void handleEvent(Message events, PartitionKey partitionKey) {
+    public void handleMessage(Message message, PartitionKey partitionKey) {
+        if (message == null) {
+            return;
+        }
         TimeBoundPriorityQueue<Message> queue = findOrCreateQueue(partitionKey);
-        handleEvents(queue.addItemThenPurge(events), partitionKey);
+        handleMessages(queue.addItemThenPurge(message), partitionKey);
     }
 
-    public void handleEvents(List<Message> events, PartitionKey partitionKey) {
-        for (var event : events) {
-            if (event instanceof BitstampOrder order) {
+    public void handleMessages(List<Message> messages, PartitionKey partitionKey) {
+        for (var message : messages) {
+            if (message == null) {
+                continue;
+            }
+
+            if (message instanceof BitstampOrder order) {
                 handleOrder(order, partitionKey);
-            } else if (event instanceof BitstampTrade trade) {
+            } else if (message instanceof BitstampTrade trade) {
                 handleTrade(trade, partitionKey);
             } else {
-                publish(event, partitionKey);
+                publish(message, partitionKey);
             }
         }
     }

@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface MessageHandler {
 
-    void handleEvent(Message messages, PartitionKey partitionKey);
+    void handleMessage(Message messages, PartitionKey partitionKey);
 
-    void handleEvents(List<Message> events, PartitionKey partitionKey);
+    void handleMessages(List<Message> events, PartitionKey partitionKey);
 }

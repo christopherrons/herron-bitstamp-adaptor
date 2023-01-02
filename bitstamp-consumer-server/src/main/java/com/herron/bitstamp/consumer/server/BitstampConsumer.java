@@ -70,7 +70,7 @@ public class BitstampConsumer {
 
         var stateChange = new BitstampStateChange(orderbook.orderbookId(), StateChangeTypeEnum.CONTINUOUS_TRADING, Instant.now().toEpochMilli());
 
-        messageHandler.handleEvents(List.of(instrument, orderbook, stateChange), getPartitionKey(channel));
+        messageHandler.handleMessages(List.of(instrument, orderbook, stateChange), getPartitionKey(channel));
         LOGGER.info("Init Orderbook for detail complete: {}", channel);
     }
 
