@@ -10,7 +10,7 @@ import org.springframework.kafka.config.TopicBuilder;
 @Configuration
 public class KafkaTopicConfig {
 
-    @Value("${audit-trail.nr-of-partitions}")
+    @Value("${kafka-topic-bitstamp-market-data.nr-of-partitions}")
     public int nrOfPartitions;
 
     @Bean
