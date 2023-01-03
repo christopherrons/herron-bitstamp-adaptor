@@ -147,7 +147,9 @@ public class BitstampSubscription {
                 isSubscribed = false;
                 subscribe();
             }
-            case ORDER_CREATED, ORDER_DELETED, ORDER_UPDATED -> messageHandler.handleMessage(event.getOrder(), getPartitionKey(event.channel()));
+            case ORDER_CREATED -> messageHandler.handleMessage(event.getAddOrder(), getPartitionKey(event.channel()));
+            case ORDER_UPDATED -> messageHandler.handleMessage(event.getUpdateOrder(), getPartitionKey(event.channel()));
+            case ORDER_DELETED -> messageHandler.handleMessage(event.getCancelOrder(), getPartitionKey(event.channel()));
             case TRADE -> messageHandler.handleMessage(event.getTrade(), getPartitionKey(event.channel()));
             default -> LOGGER.warn("Unhandled Bitstamp event received {}: ", event);
         }

@@ -28,9 +28,27 @@ public record BitstampEventData(@JsonProperty("data") Map<String, Object> data, 
         return event;
     }
 
-    public BitstampUpdateOrder getOrder() {
+    public BitstampAddOrder getAddOrder() {
+        try {
+            return new BitstampAddOrder(data, channel, event);
+        } catch (Exception e) {
+            LOGGER.warn("Unable to parse Order: Data: {}, Channel: {}, Event: {}", data, channel, event);
+            return null;
+        }
+    }
+
+    public BitstampUpdateOrder getUpdateOrder() {
         try {
             return new BitstampUpdateOrder(data, channel, event);
+        } catch (Exception e) {
+            LOGGER.warn("Unable to parse Order: Data: {}, Channel: {}, Event: {}", data, channel, event);
+            return null;
+        }
+    }
+
+    public BitstampCancelOrder getCancelOrder() {
+        try {
+            return new BitstampCancelOrder(data, channel, event);
         } catch (Exception e) {
             LOGGER.warn("Unable to parse Order: Data: {}, Channel: {}, Event: {}", data, channel, event);
             return null;

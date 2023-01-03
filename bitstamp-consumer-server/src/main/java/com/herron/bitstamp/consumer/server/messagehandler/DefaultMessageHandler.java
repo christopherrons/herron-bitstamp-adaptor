@@ -1,12 +1,11 @@
 package com.herron.bitstamp.consumer.server.messagehandler;
 
 import com.herron.bitstamp.consumer.server.api.MessageHandler;
-import com.herron.bitstamp.consumer.server.messages.BitstampUpdateOrder;
+import com.herron.bitstamp.consumer.server.messages.BitstampAddOrder;
 import com.herron.bitstamp.consumer.server.messages.BitstampTrade;
 import com.herron.exchange.common.api.common.api.Message;
 import com.herron.exchange.common.api.common.comparator.MessageComparator;
 import com.herron.exchange.common.api.common.datastructures.TimeBoundBlockingPriorityQueue;
-import com.herron.exchange.common.api.common.enums.OrderOperationEnum;
 import com.herron.exchange.common.api.common.enums.OrderTypeEnum;
 import com.herron.exchange.common.api.common.logging.EventLogger;
 import com.herron.exchange.common.api.common.messages.HerronBroadcastMessage;
@@ -60,7 +59,8 @@ public class DefaultMessageHandler implements MessageHandler {
                 continue;
             }
 
-            if (message instanceof BitstampUpdateOrder order) {
+            if (message instanceof BitstampAddOrder order) {
+                // Since we have our own trading engine we only handle add orders
                 handleOrder(order, partitionKey);
             } else if (message instanceof BitstampTrade trade) {
                 handleTrade(trade, partitionKey);
@@ -70,15 +70,11 @@ public class DefaultMessageHandler implements MessageHandler {
         }
     }
 
-    private void handleOrder(BitstampUpdateOrder order, PartitionKey partitionKey) {
-        if (order.orderOperation() == OrderOperationEnum.CREATE) {//|| (order.orderOperation() == OrderOperationEnum.UPDATE && orderIds.contains(order.orderId()))) {
-            if (order.orderType() == OrderTypeEnum.LIMIT && order.price() > 99_999_999.0) {
-                return;
-            }
-            // We only handle updates if we have received the initial create
-            // orderIds.add(order.orderId());
-            publish(order, partitionKey);
+    private void handleOrder(BitstampAddOrder order, PartitionKey partitionKey) {
+        if (order.orderType() == OrderTypeEnum.LIMIT && order.price() > 99_999_999.0) {
+            return;
         }
+        publish(order, partitionKey);
     }
 
     private void handleTrade(BitstampTrade trade, PartitionKey partitionKey) {
