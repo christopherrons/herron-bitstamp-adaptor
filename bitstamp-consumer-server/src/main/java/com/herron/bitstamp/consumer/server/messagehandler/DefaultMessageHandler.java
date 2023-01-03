@@ -74,6 +74,10 @@ public class DefaultMessageHandler implements MessageHandler {
         if (order.orderType() == OrderTypeEnum.LIMIT && order.price() > 99_999_999.0) {
             return;
         }
+
+        if (order.currentVolume() <= 0 || order.price() <= 0) {
+            return;
+        }
         publish(order, partitionKey);
     }
 
