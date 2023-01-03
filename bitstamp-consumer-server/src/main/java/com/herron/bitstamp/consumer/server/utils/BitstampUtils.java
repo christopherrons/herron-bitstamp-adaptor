@@ -1,9 +1,9 @@
 package com.herron.bitstamp.consumer.server.utils;
 
 import com.github.javafaker.Faker;
+import com.herron.exchange.common.api.common.enums.KafkaTopicEnum;
 import com.herron.exchange.common.api.common.enums.OrderExecutionTypeEnum;
 import com.herron.exchange.common.api.common.enums.OrderTypeEnum;
-import com.herron.exchange.common.api.common.enums.TopicEnum;
 import com.herron.exchange.common.api.common.model.Participant;
 import com.herron.exchange.common.api.common.model.PartitionKey;
 
@@ -49,7 +49,7 @@ public class BitstampUtils {
     }
 
     public static PartitionKey getPartitionKey(String channel) {
-        return new PartitionKey(TopicEnum.BITSTAMP_MARKET_DATA, channel.contains("eur") ? 0 : 1);
+        return new PartitionKey(KafkaTopicEnum.BITSTAMP_MARKET_DATA, channel.contains("eur") ? 0 : 1);
     }
 
 }

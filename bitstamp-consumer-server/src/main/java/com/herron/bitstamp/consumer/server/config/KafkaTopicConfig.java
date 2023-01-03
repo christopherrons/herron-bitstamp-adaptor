@@ -1,6 +1,6 @@
 package com.herron.bitstamp.consumer.server.config;
 
-import com.herron.exchange.common.api.common.enums.TopicEnum;
+import com.herron.exchange.common.api.common.enums.KafkaTopicEnum;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -16,7 +16,7 @@ public class KafkaTopicConfig {
     @Bean
     public NewTopic bitstampMarketDataTopic() {
         return TopicBuilder
-                .name(TopicEnum.BITSTAMP_MARKET_DATA.getTopicName())
+                .name(KafkaTopicEnum.BITSTAMP_MARKET_DATA.getTopicName())
                 .partitions(nrOfPartitions)
                 .build();
     }
