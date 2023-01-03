@@ -1,7 +1,7 @@
 package com.herron.bitstamp.consumer.server.messagehandler;
 
 import com.herron.bitstamp.consumer.server.api.MessageHandler;
-import com.herron.bitstamp.consumer.server.messages.BitstampOrder;
+import com.herron.bitstamp.consumer.server.messages.BitstampUpdateOrder;
 import com.herron.bitstamp.consumer.server.messages.BitstampTrade;
 import com.herron.exchange.common.api.common.api.Message;
 import com.herron.exchange.common.api.common.comparator.MessageComparator;
@@ -60,7 +60,7 @@ public class DefaultMessageHandler implements MessageHandler {
                 continue;
             }
 
-            if (message instanceof BitstampOrder order) {
+            if (message instanceof BitstampUpdateOrder order) {
                 handleOrder(order, partitionKey);
             } else if (message instanceof BitstampTrade trade) {
                 handleTrade(trade, partitionKey);
@@ -70,7 +70,7 @@ public class DefaultMessageHandler implements MessageHandler {
         }
     }
 
-    private void handleOrder(BitstampOrder order, PartitionKey partitionKey) {
+    private void handleOrder(BitstampUpdateOrder order, PartitionKey partitionKey) {
         if (order.orderOperation() == OrderOperationEnum.CREATE) {//|| (order.orderOperation() == OrderOperationEnum.UPDATE && orderIds.contains(order.orderId()))) {
             if (order.orderType() == OrderTypeEnum.LIMIT && order.price() > 99_999_999.0) {
                 return;

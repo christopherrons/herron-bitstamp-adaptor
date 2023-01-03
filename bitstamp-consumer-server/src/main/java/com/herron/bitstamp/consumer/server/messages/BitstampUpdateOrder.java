@@ -2,7 +2,7 @@ package com.herron.bitstamp.consumer.server.messages;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.herron.exchange.common.api.common.api.Message;
-import com.herron.exchange.common.api.common.api.Order;
+import com.herron.exchange.common.api.common.api.UpdateOrder;
 import com.herron.exchange.common.api.common.enums.*;
 import com.herron.exchange.common.api.common.model.MonetaryAmount;
 import com.herron.exchange.common.api.common.model.Participant;
@@ -10,20 +10,21 @@ import com.herron.exchange.common.api.common.model.Participant;
 import java.util.Map;
 
 import static com.herron.bitstamp.consumer.server.utils.BitstampUtils.*;
-import static com.herron.exchange.common.api.common.enums.MessageTypesEnum.*;
+import static com.herron.exchange.common.api.common.enums.MessageTypesEnum.BITSTAMP_UPDATE_ORDER;
 
-public record BitstampOrder(OrderOperationEnum orderOperation,
-                            Participant participant,
-                            String orderId,
-                            OrderSideEnum orderSide,
-                            double initialVolume,
-                            double currentVolume,
-                            MonetaryAmount monetaryAmount,
-                            long timeStampInMs,
-                            String instrumentId,
-                            String orderbookId,
-                            OrderExecutionTypeEnum orderExecutionType,
-                            OrderTypeEnum orderType) implements Order {
+public record BitstampUpdateOrder(OrderOperationEnum orderOperation,
+                                  Participant participant,
+                                  String orderId,
+                                  OrderSideEnum orderSide,
+                                  double initialVolume,
+                                  double currentVolume,
+                                  MonetaryAmount monetaryAmount,
+                                  long timeStampInMs,
+                                  String instrumentId,
+                                  String orderbookId,
+                                  OrderExecutionTypeEnum orderExecutionType,
+                                  OrderTypeEnum orderType,
+                                  OrderUpdatedOperationTypeEnum updateOperationType) implements UpdateOrder {
 
     /*  Json Structure example of Bitstamp Live Order
 {
@@ -41,7 +42,7 @@ public record BitstampOrder(OrderOperationEnum orderOperation,
      "channel": "live_orders_xrpusd",
      "event": "order_deleted"
  }*/
-    public BitstampOrder(@JsonProperty("data") Map<String, Object> data, @JsonProperty("channel") String channel, @JsonProperty("event") String event) {
+    public BitstampUpdateOrder(@JsonProperty("data") Map<String, Object> data, @JsonProperty("channel") String channel, @JsonProperty("event") String event) {
         this(OrderOperationEnum.extractValue(event),
                 generateParticipant(),
                 !data.isEmpty() ? (String) data.get("id_str") : "NONE",
@@ -53,11 +54,12 @@ public record BitstampOrder(OrderOperationEnum orderOperation,
                 createInstrumentId(channel),
                 createOrderbookId(channel),
                 generateOrderExecutionType(),
-                generateOrderType()
+                generateOrderType(),
+                OrderUpdatedOperationTypeEnum.EXTERNAL_UPDATE
         );
     }
 
-    public BitstampOrder(Order order) {
+    public BitstampUpdateOrder(UpdateOrder order) {
         this(order.orderOperation(),
                 order.participant(),
                 order.orderId(),
@@ -69,7 +71,8 @@ public record BitstampOrder(OrderOperationEnum orderOperation,
                 order.instrumentId(),
                 order.orderbookId(),
                 order.orderExecutionType(),
-                order.orderType());
+                order.orderType(),
+                order.updateOperationType());
     }
 
     @Override
@@ -82,16 +85,11 @@ public record BitstampOrder(OrderOperationEnum orderOperation,
 
     @Override
     public Message getCopy() {
-        return new BitstampOrder(this);
+        return new BitstampUpdateOrder(this);
     }
 
     @Override
     public MessageTypesEnum messageType() {
-        return switch (orderOperation) {
-            case CREATE -> BITSTAMP_ADD_ORDER;
-            case UPDATE -> BITSTAMP_UPDATE_ORDER;
-            case DELETE -> BITSTAMP_CANCEL_ORDER;
-            default -> INVALID_MESSAGE_TYPE;
-        };
+        return BITSTAMP_UPDATE_ORDER;
     }
 }

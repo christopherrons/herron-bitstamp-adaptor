@@ -28,9 +28,9 @@ public record BitstampEventData(@JsonProperty("data") Map<String, Object> data, 
         return event;
     }
 
-    public BitstampOrder getOrder() {
+    public BitstampUpdateOrder getOrder() {
         try {
-            return new BitstampOrder(data, channel, event);
+            return new BitstampUpdateOrder(data, channel, event);
         } catch (Exception e) {
             LOGGER.warn("Unable to parse Order: Data: {}, Channel: {}, Event: {}", data, channel, event);
             return null;
