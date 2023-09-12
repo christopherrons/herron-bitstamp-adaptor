@@ -35,7 +35,6 @@ public class BitstampUtils {
         return ORDER_EXECUTION_TYPES.get(RANDOM_UNIFORM.nextInt(ORDER_EXECUTION_TYPES.size()));
     }
 
-
     public static String generateUser() {
         return String.format("%s%s", NAME_FAKER.funnyName().name(), NAME_FAKER.name().lastName());
     }

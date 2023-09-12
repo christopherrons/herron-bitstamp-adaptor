@@ -6,7 +6,6 @@ import com.herron.bitstamp.consumer.server.messages.BitstampTrade;
 import com.herron.exchange.common.api.common.api.Message;
 import com.herron.exchange.common.api.common.comparator.MessageComparator;
 import com.herron.exchange.common.api.common.datastructures.TimeBoundBlockingPriorityQueue;
-import com.herron.exchange.common.api.common.enums.OrderTypeEnum;
 import com.herron.exchange.common.api.common.logging.EventLogger;
 import com.herron.exchange.common.api.common.messages.HerronBroadcastMessage;
 import com.herron.exchange.common.api.common.model.PartitionKey;
@@ -71,10 +70,6 @@ public class DefaultMessageHandler implements MessageHandler {
     }
 
     private void handleOrder(BitstampAddOrder order, PartitionKey partitionKey) {
-        if (order.orderType() == OrderTypeEnum.LIMIT && order.price() > 99_999_999.0) {
-            return;
-        }
-
         if (order.currentVolume() <= 0 || order.price() <= 0) {
             return;
         }

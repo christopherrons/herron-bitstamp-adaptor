@@ -54,7 +54,7 @@ public record BitstampAddOrder(OrderOperationEnum orderOperation,
                 createInstrumentId(channel),
                 createOrderbookId(channel),
                 generateOrderExecutionType(),
-                generateOrderType(),
+                Double.parseDouble((String) data.get("price_str")) <= 99_999_999.0 ? OrderTypeEnum.LIMIT : OrderTypeEnum.MARKET,
                 OrderAddOperationTypeEnum.NEW_ORDER
         );
     }
