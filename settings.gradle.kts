@@ -1,6 +1,6 @@
-rootProject.name = "bitstamp-consumer"
-include("bitstamp-consumer-server")
-include("bitstamp-consumer-deploy")
+rootProject.name = "event-generator"
+include("event-generator-server")
+include("event-generator-deploy")
 
 
 dependencyResolutionManagement {

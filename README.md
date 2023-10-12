@@ -1,7 +1,6 @@
-# Bitstamp Consumer
+# Event Generator
 
-This application subscribes to anonymous order or trades for trading pairs configured in the application,
-see [official documentation](https://www.bitstamp.net/websocket/v2/).
+This application broadcasts events that are generator or available from public sources  [official documentation](https://www.bitstamp.net/websocket/v2/).
 
 ## Table of Content
 
@@ -39,8 +38,7 @@ subscription-config:
 
 All massages are handled by a
 default [Message Handler](bitstamp-consumer-server/src/main/java/com/herron/bitstamp/consumer/server/messagehandler/DefaultMessageHandler.java)
-which sends the messages to a `Kafka` broker. The Message Handler bean
-can be overriden to alter this behavior.
+which sends the messages to a `Kafka` broker. The Message Handler bean can be overriden to alter this behavior.
 
 ## Application DevOps
 

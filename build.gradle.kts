@@ -6,7 +6,7 @@ plugins {
 }
 
 springBoot {
-    mainClass.set("com.herron.bitstamp.consumer.server.BitstampConsumerApplication")
+    mainClass.set("com.herron.bitstamp.consumer.server.EventGeneratorApplication")
 }
 
 // Project Configs
@@ -26,7 +26,7 @@ allprojects {
     apply(plugin = "maven-publish")
     apply(plugin = "java-library")
 
-    group = "com.herron.bitstamp.consumer"
+    group = "com.herron.event.generator"
     version = "1.0.0-SNAPSHOT"
     if (project.hasProperty("releaseVersion")) {
         val releaseVersion: String by project
@@ -41,7 +41,7 @@ allprojects {
 
 dependencies {
     //Project Modules
-    implementation(project(":bitstamp-consumer-server"))
+    implementation(project(":event-generator-server"))
 
     // Internal Libs
     implementation(libs.common.api)
@@ -72,7 +72,7 @@ tasks.register<Tar>("buildAndPackage") {
     compression = Compression.GZIP
     archiveExtension.set("tar.gz")
     destinationDirectory.set(layout.buildDirectory.dir(releaseDirName))
-    from(layout.projectDirectory.dir("bitstamp-consumer-deploy/src/main/java/com/herron/bitstamp/consumer/deploy/scripts")) {
+    from(layout.projectDirectory.dir("herron-event-generator-deploy/src/main/java/com/herron/event/generator/deploy/scripts")) {
         exclude("**/*.md")
     }
     from(layout.buildDirectory.file("libs/${rootProject.name}-${version}.jar"))
@@ -82,7 +82,7 @@ tasks.register("deployToServer") {
     remotes {
         withGroovyBuilder {
             "create"("webServer") {
-                setProperty("host", "bitstamp-consumer-1")
+                setProperty("host", "herron-event-generator-1")
                 setProperty("user", "herron")
                 setProperty("agent", true)
             }
@@ -98,8 +98,8 @@ tasks.register("deployToServer") {
                         "into" to "/home/herron/deploy"
                     )
                 )
-                execute("tar -xf /home/herron/deploy/bitstamp-consumer-${version}.tar.gz --directory /home/herron/deploy/")
-                execute("rm /home/herron/deploy/bitstamp-consumer-${version}.tar.gz ")
+                execute("tar -xf /home/herron/deploy/herron-event-generator-${version}.tar.gz --directory /home/herron/deploy/")
+                execute("rm /home/herron/deploy/herron-event-generator-${version}.tar.gz ")
                 execute("cd /home/herron/deploy/ && bash /home/herron/deploy/bootstrap.sh")
             })
         })
