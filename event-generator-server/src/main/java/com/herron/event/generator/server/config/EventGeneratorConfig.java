@@ -1,5 +1,6 @@
 package com.herron.event.generator.server.config;
 
+import com.herron.event.generator.server.EventGenerationBootloader;
 import com.herron.event.generator.server.emulation.OrderEventEmulator;
 import com.herron.event.generator.server.emulation.PreviousSettlementPriceConsumer;
 import com.herron.event.generator.server.emulation.ReferenceDataConsumer;
@@ -40,7 +41,6 @@ public class EventGeneratorConfig {
         return new KafkaBroadcastHandler(kafkaTemplate);
     }
 
-    @Bean(initMethod = "init")
     public OrderEventEmulator orderEventEmulator(KafkaBroadcastHandler kafkaBroadcastHandler,
                                                  CountDownLatch emulationCountdownLatch,
                                                  PreviousSettlementPriceConsumer previousSettlementPriceConsumer) {
@@ -56,11 +56,15 @@ public class EventGeneratorConfig {
         return new BitstampWebsocketClient();
     }
 
-    @Bean(initMethod = "init")
     public BitstampConsumer bitstampConsumer(SubscriptionDetailConfig subscriptionDetailConfig,
                                              BitsampBroadcaster bitsampBroadcaster,
                                              BitstampWebsocketClient bitstampWebsocketClient) {
         return new BitstampConsumer(subscriptionDetailConfig, bitsampBroadcaster, bitstampWebsocketClient);
+    }
+
+    @Bean(initMethod = "init")
+    public EventGenerationBootloader eventGenerationBootloader(BitstampConsumer bitstampConsumer, OrderEventEmulator orderEventEmulator) {
+        return new EventGenerationBootloader(bitstampConsumer, orderEventEmulator);
     }
 
     @Component
