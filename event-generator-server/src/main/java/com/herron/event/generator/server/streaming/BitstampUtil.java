@@ -9,6 +9,7 @@ import com.herron.exchange.integrations.generator.bitstamp.api.BitstampMessage;
 import com.herron.exchange.integrations.generator.bitstamp.messages.BitstampAddOrder;
 
 public class BitstampUtil {
+    private static final String ID = "bitstamp_equity_btcusd";
 
     public static Event mapMessage(BitstampMessage bitstampMessage) {
         // We only care for add orders as this application servers as an event generator
@@ -24,14 +25,14 @@ public class BitstampUtil {
                 .orderId(addOrder.orderId())
                 .currentVolume(Volume.create(addOrder.currentVolume()))
                 .initialVolume(Volume.create(addOrder.initialVolume()))
-                .instrumentId(addOrder.instrumentId())
+                .instrumentId(ID)
                 .orderSide(addOrder.orderSide())
                 .price(Price.create(addOrder.price()))
                 .participant(addOrder.participant())
                 .orderType(addOrder.orderType())
                 .orderExecutionType(addOrder.orderExecutionType())
                 .addOperationType(addOrder.addOperationType())
-                .orderbookId(addOrder.orderbookId())
+                .orderbookId(ID)
                 .build();
     }
 }

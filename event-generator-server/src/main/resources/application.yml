@@ -10,7 +10,4 @@ kafka:
 subscription-config:
   uri: wss://ws.bitstamp.net
   channels:
-    - live_orders_btceur
     - live_orders_btcusd
-    - live_orders_xrpeur
-    - live_orders_xrpusd

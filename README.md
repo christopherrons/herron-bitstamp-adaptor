@@ -29,15 +29,12 @@ When the application is started it starts consuming reference data and previous 
 
 When the application is started Bitstamp trading pairs configured in
 the [application.yml](bitstamp-consumer-server/src/main/resources/application.yml) are automatically subscribed to. The
-configuration is as follows:
+configuration has the following fields:
 
 ```yml
 subscription-config:
   uri: wss://ws.bitstamp.net
   channels:
-    - live_orders_btceur
-    - live_orders_btcusd
-    - live_orders_xrpeur
     - live_orders_btcusd
 ```
 
