@@ -4,8 +4,8 @@ spring:
 
 kafka:
   topic:
-    bitstamp-market-data:
-      nr-of-partitions: 2
+    herron-order-data:
+      nr-of-partitions: 1
 
 subscription-config:
   uri: wss://ws.bitstamp.net

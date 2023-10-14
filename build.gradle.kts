@@ -6,7 +6,7 @@ plugins {
 }
 
 springBoot {
-    mainClass.set("com.herron.bitstamp.consumer.server.EventGeneratorApplication")
+    mainClass.set("com.herron.event.generator.server.EventGeneratorApplication")
 }
 
 // Project Configs
@@ -46,6 +46,8 @@ dependencies {
     // Internal Libs
     implementation(libs.common.api)
     implementation(libs.common)
+    implementation(libs.integrations)
+    implementation(libs.integration)
 
     // External Libs
     implementation(libs.spring.boot.starter.web)

@@ -1,12 +1,13 @@
 # Event Generator
 
-This application broadcasts events that are generator or available from public sources  [official documentation](https://www.bitstamp.net/websocket/v2/).
+This application broadcasts events that are generator or available from public
+sources  [official documentation](https://www.bitstamp.net/websocket/v2/).
 
 ## Table of Content
 
 * [Requirements](#requirements): Application requirements.
 * [Documentation](#documentation): Further documentation.
-* [Configuration](#configuration): How to configure the application.
+* [Events](#events): Events generated.
 * [Application DevOps](#application-devops): How to deploy the application.
 
 ## Requirements
@@ -20,11 +21,15 @@ This application broadcasts events that are generator or available from public s
 * [Deploy Scripts](docs/deploy-scripts.md): Useful scripts once the application is deployed.
 * [Data Flow](docs/data-flow.md): Visualization of the application data flow.
 
-## Configuration
+## Events
 
-When the application is started trading pairs configured in
+When the application is started it starts consuming reference data and previous day settlement prices from Kafka.
+
+### Bistamp
+
+When the application is started Bitstamp trading pairs configured in
 the [application.yml](bitstamp-consumer-server/src/main/resources/application.yml) are automatically subscribed to. The
-format is:
+configuration is as follows:
 
 ```yml
 subscription-config:
@@ -36,9 +41,10 @@ subscription-config:
     - live_orders_btcusd
 ```
 
-All massages are handled by a
-default [Message Handler](bitstamp-consumer-server/src/main/java/com/herron/bitstamp/consumer/server/messagehandler/DefaultMessageHandler.java)
-which sends the messages to a `Kafka` broker. The Message Handler bean can be overriden to alter this behavior.
+### Emulation
+
+Once the reference data and previous day settlement prices are loaded insert orders are generated for max 20 price
+levels per orderbook. Tens of thousands of orders are generator per second.
 
 ## Application DevOps
 

@@ -12,27 +12,27 @@ Once the application is deployed, script are used for starting, monitoring and s
 
 Common variables used by the scripts are set in:
 
-* [setenv-server.sh](../bitstamp-consumer-deploy/src/main/java/com/herron/bitstamp/consumer/deploy/scripts/setenv-server.sh)
-* [setenv-kafka.sh](../bitstamp-consumer-deploy/src/main/java/com/herron/bitstamp/consumer/deploy/scripts/setenv-kafka.sh)
+* [setenv-server.sh](../event-generator-deploy/src/main/java/com/herron/event/generator/deploy/scripts/setenv-server.sh)
+* [setenv-kafka.sh](../event-generator-deploy/src/main/java/com/herron/event/generator/deploy/scripts/setenv-kafka.sh)
 
 ### Bootstrap script
 
-The [bootstrap.sh](../bitstamp-consumer-deploy/src/main/java/com/herron/bitstamp/consumer/deploy/scripts/bootstrap.sh)
+The [bootstrap.sh](../event-generator-deploy/src/main/java/com/herron/event/generator/deploy/scripts/bootstrap.sh)
 is used to init and maintain the deploy directory.
 
 ### Start Script
 
 Start the application by running:
 
-1. [startup-kafka.sh](../bitstamp-consumer-deploy/src/main/java/com/herron/bitstamp/consumer/deploy/scripts/startup-kafka.sh).
-2. [startup-server.sh](../bitstamp-consumer-deploy/src/main/java/com/herron/bitstamp/consumer/deploy/scripts/startup-server.sh).
+1. [startup-kafka.sh](../event-generator-deploy/src/main/java/com/herron/event/generator/deploy/scripts/startup-kafka.sh).
+2. [startup-server.sh](../event-generator-deploy/src/main/java/com/herron/event/generator/deploy/scripts/startup-server.sh).
 
 ### Shutdown Script
 
-1. [shutdown-kafka.sh](../bitstamp-consumer-deploy/src/main/java/com/herron/bitstamp/consumer/deploy/scripts/shutdown-kafka.sh).
-2. [shutdown-server.sh](../bitstamp-consumer-deploy/src/main/java/com/herron/bitstamp/consumer/deploy/scripts/shutdown-server.sh).
+1. [shutdown-kafka.sh](../event-generator-deploy/src/main/java/com/herron/event/generator/deploy/scripts/shutdown-kafka.sh).
+2. [shutdown-server.sh](../event-generator-deploy/src/main/java/com/herron/event/generator/deploy/scripts/shutdown-server.sh).
 
 ## Crontab
 
 Crontab is used for
-scheduled [task](../bitstamp-consumer-deploy/src/main/java/com/herron/bitstamp/consumer/deploy/cron/bitstamp-consumer.crontab).
+scheduled [task](../event-generator-deploy/src/main/java/com/herron/event/generator/deploy/cron/event-generator.crontab).
