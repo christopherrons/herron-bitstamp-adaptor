@@ -1,11 +1,11 @@
-package com.herron.event.generator.server.emulation;
+package com.herron.exchange.eventgenerator.server.emulation;
 
 import com.herron.exchange.common.api.common.api.Message;
-import com.herron.exchange.common.api.common.api.broadcasts.DataLoadingState;
+import com.herron.exchange.common.api.common.api.broadcasts.DataStreamState;
+import com.herron.exchange.common.api.common.api.marketdata.MarketDataPrice;
 import com.herron.exchange.common.api.common.enums.KafkaTopicEnum;
 import com.herron.exchange.common.api.common.kafka.DataConsumer;
-import com.herron.exchange.common.api.common.model.PartitionKey;
-import com.herron.exchange.common.api.common.model.Price;
+import com.herron.exchange.common.api.common.messages.common.PartitionKey;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +22,7 @@ public class PreviousSettlementPriceConsumer extends DataConsumer {
     private static final Logger LOGGER = LoggerFactory.getLogger(PreviousSettlementPriceConsumer.class);
     private static final PartitionKey PARTITION_ZERO_KEY = new PartitionKey(KafkaTopicEnum.PREVIOUS_SETTLEMENT_PRICE_DATA, 0);
     private final CountDownLatch countDownLatch;
-    private final Map<String, Price> instrumentIdToPreviousSettlementPrices = new ConcurrentHashMap<>();
+    private final Map<String, MarketDataPrice> instrumentIdToPreviousSettlementPrices = new ConcurrentHashMap<>();
 
     public PreviousSettlementPriceConsumer(CountDownLatch countDownLatch) {
         this.countDownLatch = countDownLatch;
@@ -39,7 +39,7 @@ public class PreviousSettlementPriceConsumer extends DataConsumer {
     }
 
     private void handleMessage(Message message) {
-        if (message instanceof DataLoadingState state) {
+        if (message instanceof DataStreamState state) {
             switch (state.state()) {
                 case START -> LOGGER.info("Started consuming previous day settlement price data.");
                 case DONE -> {
@@ -51,7 +51,7 @@ public class PreviousSettlementPriceConsumer extends DataConsumer {
         }
     }
 
-    public Map<String, Price> getInstrumentIdToPreviousSettlementPrices() {
+    public Map<String, MarketDataPrice> getInstrumentIdToPreviousSettlementPrices() {
         return instrumentIdToPreviousSettlementPrices;
     }
 }

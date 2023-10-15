@@ -1,11 +1,11 @@
-package com.herron.event.generator.server.config;
+package com.herron.exchange.eventgenerator.server.config;
 
-import com.herron.event.generator.server.EventGenerationBootloader;
-import com.herron.event.generator.server.emulation.OrderEventEmulator;
-import com.herron.event.generator.server.emulation.PreviousSettlementPriceConsumer;
-import com.herron.event.generator.server.emulation.ReferenceDataConsumer;
-import com.herron.event.generator.server.streaming.BitsampBroadcaster;
-import com.herron.event.generator.server.streaming.BitstampConsumer;
+import com.herron.exchange.eventgenerator.server.EventGenerationBootloader;
+import com.herron.exchange.eventgenerator.server.emulation.OrderEventEmulator;
+import com.herron.exchange.eventgenerator.server.emulation.PreviousSettlementPriceConsumer;
+import com.herron.exchange.eventgenerator.server.emulation.ReferenceDataConsumer;
+import com.herron.exchange.eventgenerator.server.streaming.BitstampBroadcaster;
+import com.herron.exchange.eventgenerator.server.streaming.BitstampConsumer;
 import com.herron.exchange.common.api.common.kafka.KafkaBroadcastHandler;
 import com.herron.exchange.integrations.generator.bitstamp.BitstampWebsocketClient;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -41,14 +41,16 @@ public class EventGeneratorConfig {
         return new KafkaBroadcastHandler(kafkaTemplate);
     }
 
+    @Bean
     public OrderEventEmulator orderEventEmulator(KafkaBroadcastHandler kafkaBroadcastHandler,
                                                  CountDownLatch emulationCountdownLatch,
                                                  PreviousSettlementPriceConsumer previousSettlementPriceConsumer) {
         return new OrderEventEmulator(kafkaBroadcastHandler, emulationCountdownLatch, previousSettlementPriceConsumer);
     }
 
-    public BitsampBroadcaster bistampMessageBroadcaster(KafkaBroadcastHandler kafkaBroadcastHandler) {
-        return new BitsampBroadcaster(kafkaBroadcastHandler);
+    @Bean
+    public BitstampBroadcaster bistampMessageBroadcaster(KafkaBroadcastHandler kafkaBroadcastHandler) {
+        return new BitstampBroadcaster(kafkaBroadcastHandler);
     }
 
     @Bean
@@ -56,10 +58,11 @@ public class EventGeneratorConfig {
         return new BitstampWebsocketClient();
     }
 
+    @Bean
     public BitstampConsumer bitstampConsumer(SubscriptionDetailConfig subscriptionDetailConfig,
-                                             BitsampBroadcaster bitsampBroadcaster,
+                                             BitstampBroadcaster bitstampBroadcaster,
                                              BitstampWebsocketClient bitstampWebsocketClient) {
-        return new BitstampConsumer(subscriptionDetailConfig, bitsampBroadcaster, bitstampWebsocketClient);
+        return new BitstampConsumer(subscriptionDetailConfig, bitstampBroadcaster, bitstampWebsocketClient);
     }
 
     @Bean(initMethod = "init")

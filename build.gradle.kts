@@ -6,7 +6,7 @@ plugins {
 }
 
 springBoot {
-    mainClass.set("com.herron.event.generator.server.EventGeneratorApplication")
+    mainClass.set("com.herron.exchange.eventgenerator.server.EventGeneratorApplication")
 }
 
 // Project Configs

@@ -1,7 +1,7 @@
-package com.herron.event.generator.server.emulation;
+package com.herron.exchange.eventgenerator.server.emulation;
 
 import com.herron.exchange.common.api.common.api.Message;
-import com.herron.exchange.common.api.common.api.broadcasts.DataLoadingState;
+import com.herron.exchange.common.api.common.api.broadcasts.DataStreamState;
 import com.herron.exchange.common.api.common.api.referencedata.exchange.Market;
 import com.herron.exchange.common.api.common.api.referencedata.exchange.Product;
 import com.herron.exchange.common.api.common.api.referencedata.instruments.Instrument;
@@ -9,7 +9,7 @@ import com.herron.exchange.common.api.common.api.referencedata.orderbook.Orderbo
 import com.herron.exchange.common.api.common.cache.ReferenceDataCache;
 import com.herron.exchange.common.api.common.enums.KafkaTopicEnum;
 import com.herron.exchange.common.api.common.kafka.DataConsumer;
-import com.herron.exchange.common.api.common.model.PartitionKey;
+import com.herron.exchange.common.api.common.messages.common.PartitionKey;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +22,7 @@ import java.util.concurrent.CountDownLatch;
 
 public class ReferenceDataConsumer extends DataConsumer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReferenceDataConsumer.class);
-    private static final PartitionKey PARTITION_ZERO_KEY = new PartitionKey(KafkaTopicEnum.HERRON_AUDIT_TRAIL, 0);
+    private static final PartitionKey PARTITION_ZERO_KEY = new PartitionKey(KafkaTopicEnum.REFERENCE_DATA, 0);
     private final CountDownLatch countDownLatch;
 
     public ReferenceDataConsumer(CountDownLatch countDownLatch) {
@@ -52,7 +52,7 @@ public class ReferenceDataConsumer extends DataConsumer {
         } else if (message instanceof OrderbookData orderbookData) {
             ReferenceDataCache.getCache().addOrderbookData(orderbookData);
 
-        } else if (message instanceof DataLoadingState state) {
+        } else if (message instanceof DataStreamState state) {
             switch (state.state()) {
                 case START -> LOGGER.info("Started consuming reference data.");
                 case DONE -> {

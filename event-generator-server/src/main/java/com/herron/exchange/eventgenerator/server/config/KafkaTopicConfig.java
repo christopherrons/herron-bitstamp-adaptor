@@ -1,4 +1,4 @@
-package com.herron.event.generator.server.config;
+package com.herron.exchange.eventgenerator.server.config;
 
 import com.herron.exchange.common.api.common.enums.KafkaTopicEnum;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -10,13 +10,13 @@ import org.springframework.kafka.config.TopicBuilder;
 @Configuration
 public class KafkaTopicConfig {
 
-    @Value("${kafka.topic.herron-order-data.nr-of-partitions:1}")
+    @Value("${kafka.topic.order-data.nr-of-partitions:1}")
     public int nrOfPartitions;
 
     @Bean
     public NewTopic bitstampMarketDataTopic() {
         return TopicBuilder
-                .name(KafkaTopicEnum.HERRON_ORDER_DATA.getTopicName())
+                .name(KafkaTopicEnum.ORDER_DATA.getTopicName())
                 .partitions(nrOfPartitions)
                 .build();
     }

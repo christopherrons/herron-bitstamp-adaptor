@@ -1,14 +1,14 @@
-package com.herron.event.generator.server.emulation;
+package com.herron.exchange.eventgenerator.server.emulation;
 
-import com.herron.event.generator.server.utils.Utils;
 import com.herron.exchange.common.api.common.api.referencedata.orderbook.OrderbookData;
 import com.herron.exchange.common.api.common.api.trading.orders.AddOrder;
 import com.herron.exchange.common.api.common.enums.OrderAddOperationTypeEnum;
 import com.herron.exchange.common.api.common.enums.OrderExecutionTypeEnum;
 import com.herron.exchange.common.api.common.enums.OrderSideEnum;
-import com.herron.exchange.common.api.common.messages.trading.ImmutableHerronAddOrder;
-import com.herron.exchange.common.api.common.model.Price;
-import com.herron.exchange.common.api.common.model.Volume;
+import com.herron.exchange.common.api.common.messages.common.Price;
+import com.herron.exchange.common.api.common.messages.common.Volume;
+import com.herron.exchange.common.api.common.messages.trading.ImmutableDefaultAddOrder;
+import com.herron.exchange.eventgenerator.server.utils.Utils;
 
 import java.time.Instant;
 import java.util.Random;
@@ -24,7 +24,7 @@ public class EmulationUtil {
 
     public static AddOrder mapInitialAddOrder(OrderbookData orderbookData, double price, OrderSideEnum sideEnum) {
         double volume = RANDOM_GENERATOR.nextDouble(orderbookData.minTradeVolume(), 100.0);
-        return ImmutableHerronAddOrder.builder()
+        return ImmutableDefaultAddOrder.builder()
                 .addOperationType(OrderAddOperationTypeEnum.NEW_ORDER)
                 .timeOfEventMs(Instant.now().toEpochMilli())
                 .orderId(String.valueOf(ORDER_ID_GENERATOR.getAndIncrement()))
@@ -51,7 +51,7 @@ public class EmulationUtil {
             executionTypeEnum = FOK;
         }
 
-        return ImmutableHerronAddOrder.builder()
+        return ImmutableDefaultAddOrder.builder()
                 .addOperationType(OrderAddOperationTypeEnum.NEW_ORDER)
                 .timeOfEventMs(Instant.now().toEpochMilli())
                 .orderId(String.valueOf(ORDER_ID_GENERATOR.getAndIncrement()))

@@ -1,4 +1,4 @@
-package com.herron.event.generator.server.emulation;
+package com.herron.exchange.eventgenerator.server.emulation;
 
 import com.herron.exchange.common.api.common.api.referencedata.orderbook.OrderbookData;
 import com.herron.exchange.common.api.common.api.trading.orders.AddOrder;
@@ -6,7 +6,7 @@ import com.herron.exchange.common.api.common.cache.ReferenceDataCache;
 import com.herron.exchange.common.api.common.enums.KafkaTopicEnum;
 import com.herron.exchange.common.api.common.enums.OrderSideEnum;
 import com.herron.exchange.common.api.common.kafka.KafkaBroadcastHandler;
-import com.herron.exchange.common.api.common.model.PartitionKey;
+import com.herron.exchange.common.api.common.messages.common.PartitionKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,14 +16,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static com.herron.event.generator.server.emulation.EmulationUtil.mapAddOrder;
-import static com.herron.event.generator.server.emulation.EmulationUtil.mapInitialAddOrder;
 import static com.herron.exchange.common.api.common.enums.OrderSideEnum.ASK;
 import static com.herron.exchange.common.api.common.enums.OrderSideEnum.BID;
+import static com.herron.exchange.eventgenerator.server.emulation.EmulationUtil.mapAddOrder;
+import static com.herron.exchange.eventgenerator.server.emulation.EmulationUtil.mapInitialAddOrder;
 
 public class OrderEventEmulator {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderEventEmulator.class);
-    private static final PartitionKey KEY = new PartitionKey(KafkaTopicEnum.HERRON_ORDER_DATA, 0);
+    private static final PartitionKey KEY = new PartitionKey(KafkaTopicEnum.ORDER_DATA, 0);
     private static final Random RANDOM_GENERATOR = new Random(17);
     private static final int EVENTS_PER_SECOND = 25000;
     private static final int PRICE_LEVELS_PER_SIDE = 10;
@@ -42,12 +42,17 @@ public class OrderEventEmulator {
         this.emulatorThread = new Thread(this::runSimulation, this.getClass().getSimpleName());
     }
 
-    public void init() throws InterruptedException {
-        emulationCountdownLatch.await();
+    public void init() {
         emulatorThread.start();
     }
 
     private void runSimulation() {
+        try {
+            emulationCountdownLatch.await();
+        } catch (InterruptedException e) {
+
+        }
+
         LOGGER.info("Init emulation.");
 
         Map<OrderbookData, AddOrder> orderbookToInitialOrder = createAndBroadcastInitialOrders();
@@ -62,7 +67,11 @@ public class OrderEventEmulator {
         var instrumentIdToSettlementPrice = settlementPriceConsumer.getInstrumentIdToPreviousSettlementPrices();
         Map<OrderbookData, AddOrder> orderbookToInitialOrder = new HashMap<>();
         for (var orderbookData : ReferenceDataCache.getCache().getOrderbookData()) {
-            var startPrice = instrumentIdToSettlementPrice.get(orderbookData.instrument().instrumentId()).price();
+            if (!instrumentIdToSettlementPrice.containsKey(orderbookData.instrument().instrumentId())) {
+                continue;
+            }
+
+            var startPrice = instrumentIdToSettlementPrice.get(orderbookData.instrument().instrumentId()).price().getValue();
             var addOrder = mapInitialAddOrder(orderbookData, startPrice, RANDOM_GENERATOR.nextBoolean() ? BID : ASK);
             orderbookToInitialOrder.put(orderbookData, addOrder);
             broadcastHandler.broadcastMessage(KEY, addOrder);
@@ -74,7 +83,11 @@ public class OrderEventEmulator {
         var instrumentIdToSettlementPrice = settlementPriceConsumer.getInstrumentIdToPreviousSettlementPrices();
         var orderbookData = orderbookDataList.get(RANDOM_GENERATOR.nextInt(orderbookDataList.size()));
         var initialOrder = orderbookToInitialOrder.get(orderbookData);
-        var startPrice = instrumentIdToSettlementPrice.get(orderbookData.instrument().instrumentId()).price();
+        if (!instrumentIdToSettlementPrice.containsKey(orderbookData.instrument().instrumentId())) {
+            return;
+        }
+
+        var startPrice = instrumentIdToSettlementPrice.get(orderbookData.instrument().instrumentId()).price().getValue();
         var price = startPrice + (orderbookData.tickSize() * RANDOM_GENERATOR.nextInt(0, PRICE_LEVELS_PER_SIDE));
 
         OrderSideEnum side = RANDOM_GENERATOR.nextBoolean() ? BID : ASK;

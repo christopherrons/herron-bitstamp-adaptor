@@ -1,10 +1,10 @@
 spring:
   kafka:
-    bootstrap-servers: "exchange-1.int.herron.se:9092"
+    bootstrap-servers: "localhost:9092"
 
 kafka:
   topic:
-    herron-order-data:
+    order-data:
       nr-of-partitions: 1
 
 subscription-config:

@@ -13,10 +13,10 @@ dependencyResolutionManagement {
             library("javax.json.api", "javax.json:javax.json-api:1.1.4")
             library("javax.json", "org.glassfish:javax.json:1.1.4")
             library("javafaker", "com.github.javafaker:javafaker:1.0.2")
-            library("common.api", "com.herron.exchange:common-api:1.0.121")
-            library("common", "com.herron.exchange:common:1.0.121")
-            library("integration", "com.herron.exchange:integration:1.0.0")
-            library("integrations", "com.herron.exchange:integrations:1.0.0")
+            library("common.api", "com.herron.exchange:common-api:1.0.145")
+            library("common", "com.herron.exchange:common:1.0.145")
+            library("integration", "com.herron.exchange:integration:1.0.1")
+            library("integrations", "com.herron.exchange:integrations:1.0.2")
         }
 
         create("testlibs") {

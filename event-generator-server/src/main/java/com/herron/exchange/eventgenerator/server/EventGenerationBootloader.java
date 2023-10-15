@@ -1,7 +1,7 @@
-package com.herron.event.generator.server;
+package com.herron.exchange.eventgenerator.server;
 
-import com.herron.event.generator.server.emulation.OrderEventEmulator;
-import com.herron.event.generator.server.streaming.BitstampConsumer;
+import com.herron.exchange.eventgenerator.server.emulation.OrderEventEmulator;
+import com.herron.exchange.eventgenerator.server.streaming.BitstampConsumer;
 
 public class EventGenerationBootloader {
 
@@ -13,8 +13,8 @@ public class EventGenerationBootloader {
         this.eventEmulator = eventEmulator;
     }
 
-    public void init() throws InterruptedException {
-        bitstampConsumer.init();
-        eventEmulator.init();
+    public void init() {
+      //  bitstampConsumer.init();
+        // eventEmulator.init();
     }
 }

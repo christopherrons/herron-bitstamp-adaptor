@@ -1,4 +1,4 @@
-package com.herron.event.generator.server.config;
+package com.herron.exchange.eventgenerator.server.config;
 
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;

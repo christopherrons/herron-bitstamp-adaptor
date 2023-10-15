@@ -1,4 +1,4 @@
-package com.herron.event.generator.server;
+package com.herron.exchange.eventgenerator.server;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

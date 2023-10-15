@@ -1,10 +1,10 @@
-package com.herron.event.generator.server.streaming;
+package com.herron.exchange.eventgenerator.server.streaming;
 
 import com.herron.exchange.common.api.common.api.Event;
 import com.herron.exchange.common.api.common.api.trading.orders.AddOrder;
-import com.herron.exchange.common.api.common.messages.trading.ImmutableHerronAddOrder;
-import com.herron.exchange.common.api.common.model.Price;
-import com.herron.exchange.common.api.common.model.Volume;
+import com.herron.exchange.common.api.common.messages.common.Price;
+import com.herron.exchange.common.api.common.messages.common.Volume;
+import com.herron.exchange.common.api.common.messages.trading.ImmutableDefaultAddOrder;
 import com.herron.exchange.integrations.generator.bitstamp.api.BitstampMessage;
 import com.herron.exchange.integrations.generator.bitstamp.messages.BitstampAddOrder;
 
@@ -20,7 +20,7 @@ public class BitstampUtil {
     }
 
     private static AddOrder mapAddOrder(BitstampAddOrder addOrder) {
-        return ImmutableHerronAddOrder.builder()
+        return ImmutableDefaultAddOrder.builder()
                 .timeOfEventMs(addOrder.timeStampInMs())
                 .orderId(addOrder.orderId())
                 .currentVolume(Volume.create(addOrder.currentVolume()))
