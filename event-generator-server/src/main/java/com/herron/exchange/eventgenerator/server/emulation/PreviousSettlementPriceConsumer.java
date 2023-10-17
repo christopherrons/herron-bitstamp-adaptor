@@ -1,6 +1,7 @@
 package com.herron.exchange.eventgenerator.server.emulation;
 
 import com.herron.exchange.common.api.common.api.Message;
+import com.herron.exchange.common.api.common.api.MessageFactory;
 import com.herron.exchange.common.api.common.api.broadcasts.DataStreamState;
 import com.herron.exchange.common.api.common.api.marketdata.MarketDataPrice;
 import com.herron.exchange.common.api.common.enums.KafkaTopicEnum;
@@ -24,7 +25,8 @@ public class PreviousSettlementPriceConsumer extends DataConsumer {
     private final CountDownLatch countDownLatch;
     private final Map<String, MarketDataPrice> instrumentIdToPreviousSettlementPrices = new ConcurrentHashMap<>();
 
-    public PreviousSettlementPriceConsumer(CountDownLatch countDownLatch) {
+    public PreviousSettlementPriceConsumer(CountDownLatch countDownLatch, MessageFactory messageFactory) {
+        super(messageFactory);
         this.countDownLatch = countDownLatch;
     }
 
@@ -45,9 +47,11 @@ public class PreviousSettlementPriceConsumer extends DataConsumer {
                 case DONE -> {
                     var count = countDownLatch.getCount();
                     countDownLatch.countDown();
-                    LOGGER.info("Done consuming previous day settlement price data, countdown latch from {} to {}.", count, countDownLatch.getCount());
+                    LOGGER.info("Done consuming {} previous day settlement price data, countdown latch from {} to {}.", getTotalNumberOfEvents(), count, countDownLatch.getCount());
                 }
             }
+        } else if (message instanceof MarketDataPrice marketDataPrice) {
+            instrumentIdToPreviousSettlementPrices.put(marketDataPrice.staticKey().instrumentId(), marketDataPrice);
         }
     }
 

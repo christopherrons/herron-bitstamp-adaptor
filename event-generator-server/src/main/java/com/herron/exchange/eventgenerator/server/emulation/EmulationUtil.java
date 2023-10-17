@@ -8,7 +8,7 @@ import com.herron.exchange.common.api.common.enums.OrderSideEnum;
 import com.herron.exchange.common.api.common.messages.common.Price;
 import com.herron.exchange.common.api.common.messages.common.Volume;
 import com.herron.exchange.common.api.common.messages.trading.ImmutableDefaultAddOrder;
-import com.herron.exchange.eventgenerator.server.utils.Utils;
+import com.herron.exchange.eventgenerator.server.utils.EventGeneratorUtils;
 
 import java.time.Instant;
 import java.util.Random;
@@ -33,7 +33,7 @@ public class EmulationUtil {
                 .instrumentId(orderbookData.instrument().instrumentId())
                 .orderSide(sideEnum)
                 .price(Price.create(price))
-                .participant(Utils.generateParticipant())
+                .participant(EventGeneratorUtils.generateParticipant())
                 .orderType(LIMIT)
                 .orderExecutionType(FILL)
                 .orderbookId(orderbookData.orderbookId())
@@ -60,7 +60,7 @@ public class EmulationUtil {
                 .instrumentId(orderbookData.instrument().instrumentId())
                 .orderSide(sideEnum)
                 .price(Price.create(price))
-                .participant(Utils.generateParticipant())
+                .participant(EventGeneratorUtils.generateParticipant())
                 .orderType(RANDOM_GENERATOR.nextDouble() < 0.01 ? MARKET : LIMIT)
                 .orderExecutionType(executionTypeEnum)
                 .orderbookId(orderbookData.orderbookId())

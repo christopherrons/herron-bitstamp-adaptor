@@ -12,20 +12,16 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import static com.herron.exchange.common.api.common.enums.OrderSideEnum.ASK;
 import static com.herron.exchange.common.api.common.enums.OrderSideEnum.BID;
 import static com.herron.exchange.eventgenerator.server.emulation.EmulationUtil.mapAddOrder;
 import static com.herron.exchange.eventgenerator.server.emulation.EmulationUtil.mapInitialAddOrder;
 
-public class OrderEventEmulator {
-    private static final Logger LOGGER = LoggerFactory.getLogger(OrderEventEmulator.class);
-    private static final PartitionKey KEY = new PartitionKey(KafkaTopicEnum.ORDER_DATA, 0);
+public class OrderEventEmulatorBroadcaster {
+    private static final Logger LOGGER = LoggerFactory.getLogger(OrderEventEmulatorBroadcaster.class);
+    public static final PartitionKey KEY = new PartitionKey(KafkaTopicEnum.ORDER_DATA, 0);
     private static final Random RANDOM_GENERATOR = new Random(17);
-    private static final int EVENTS_PER_SECOND = 25000;
     private static final int PRICE_LEVELS_PER_SIDE = 10;
     private static final double ORDER_TRADE_RATIO = 1 / 10.0;
     private final KafkaBroadcastHandler broadcastHandler;
@@ -33,9 +29,9 @@ public class OrderEventEmulator {
     private final PreviousSettlementPriceConsumer settlementPriceConsumer;
     private final Thread emulatorThread;
 
-    public OrderEventEmulator(KafkaBroadcastHandler broadcastHandler,
-                              CountDownLatch emulationCountdownLatch,
-                              PreviousSettlementPriceConsumer settlementPriceConsumer) {
+    public OrderEventEmulatorBroadcaster(KafkaBroadcastHandler broadcastHandler,
+                                         CountDownLatch emulationCountdownLatch,
+                                         PreviousSettlementPriceConsumer settlementPriceConsumer) {
         this.broadcastHandler = broadcastHandler;
         this.emulationCountdownLatch = emulationCountdownLatch;
         this.settlementPriceConsumer = settlementPriceConsumer;
@@ -49,8 +45,8 @@ public class OrderEventEmulator {
     private void runSimulation() {
         try {
             emulationCountdownLatch.await();
-        } catch (InterruptedException e) {
-
+        } catch (InterruptedException ignore) {
+            //Ignore
         }
 
         LOGGER.info("Init emulation.");
@@ -58,9 +54,9 @@ public class OrderEventEmulator {
         Map<OrderbookData, AddOrder> orderbookToInitialOrder = createAndBroadcastInitialOrders();
         List<OrderbookData> orderbookDataList = new ArrayList<>(orderbookToInitialOrder.keySet());
 
-        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-        long period = Math.round(1000.0 / EVENTS_PER_SECOND);
-        scheduler.scheduleAtFixedRate(() -> generateEvent(orderbookToInitialOrder, orderbookDataList), 0, period, TimeUnit.MILLISECONDS);
+        while (true) {
+            generateEvent(orderbookToInitialOrder, orderbookDataList);
+        }
     }
 
     private Map<OrderbookData, AddOrder> createAndBroadcastInitialOrders() {

@@ -1,6 +1,7 @@
 package com.herron.exchange.eventgenerator.server.emulation;
 
 import com.herron.exchange.common.api.common.api.Message;
+import com.herron.exchange.common.api.common.api.MessageFactory;
 import com.herron.exchange.common.api.common.api.broadcasts.DataStreamState;
 import com.herron.exchange.common.api.common.api.referencedata.exchange.Market;
 import com.herron.exchange.common.api.common.api.referencedata.exchange.Product;
@@ -25,12 +26,13 @@ public class ReferenceDataConsumer extends DataConsumer {
     private static final PartitionKey PARTITION_ZERO_KEY = new PartitionKey(KafkaTopicEnum.REFERENCE_DATA, 0);
     private final CountDownLatch countDownLatch;
 
-    public ReferenceDataConsumer(CountDownLatch countDownLatch) {
+    public ReferenceDataConsumer(CountDownLatch countDownLatch, MessageFactory messageFactory) {
+        super(messageFactory);
         this.countDownLatch = countDownLatch;
     }
 
     @KafkaListener(id = "reference-data-consumer-0",
-            topicPartitions = {@TopicPartition(topic = "herron-reference-data", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0"))}
+            topicPartitions = {@TopicPartition(topic = "reference-data", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0"))}
     )
     public void listenReferenceDataPartitionZero(ConsumerRecord<String, String> consumerRecord) {
         var broadCastMessage = deserializeBroadcast(consumerRecord, PARTITION_ZERO_KEY);
@@ -58,7 +60,7 @@ public class ReferenceDataConsumer extends DataConsumer {
                 case DONE -> {
                     var count = countDownLatch.getCount();
                     countDownLatch.countDown();
-                    LOGGER.info("Done consuming reference data countdown latch from {} to {}.", count, countDownLatch.getCount());
+                    LOGGER.info("Done consuming {} reference data, countdown latch from {} to {}.", getTotalNumberOfEvents(), count, countDownLatch.getCount());
                 }
             }
         }

@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.IntStream;
 
-public class Utils {
+public class EventGeneratorUtils {
 
     private static final Faker NAME_FAKER = new Faker();
-    private static final List<String> USER_POOL = IntStream.range(0, 2000).mapToObj(k -> generateUser()).toList();
+    private static final List<String> USER_POOL = IntStream.range(0, 5000).mapToObj(k -> generateUser()).toList();
 
     private static final Random RANDOM_UNIFORM = new Random();
 
@@ -23,7 +23,7 @@ public class Utils {
     }
 
     public static String generateUser() {
-        return String.format("%s%s", NAME_FAKER.funnyName().name(), NAME_FAKER.name().lastName());
+        return NAME_FAKER.name().fullName();
     }
 
     public static String getUserFromPool() {
