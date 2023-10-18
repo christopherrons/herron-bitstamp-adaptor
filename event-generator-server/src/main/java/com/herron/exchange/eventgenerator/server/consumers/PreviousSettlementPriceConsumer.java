@@ -1,11 +1,11 @@
-package com.herron.exchange.eventgenerator.server.emulation;
+package com.herron.exchange.eventgenerator.server.consumers;
 
 import com.herron.exchange.common.api.common.api.Message;
 import com.herron.exchange.common.api.common.api.MessageFactory;
 import com.herron.exchange.common.api.common.api.broadcasts.DataStreamState;
 import com.herron.exchange.common.api.common.api.marketdata.MarketDataPrice;
 import com.herron.exchange.common.api.common.enums.KafkaTopicEnum;
-import com.herron.exchange.common.api.common.kafka.DataConsumer;
+import com.herron.exchange.common.api.common.kafka.KafkaDataConsumer;
 import com.herron.exchange.common.api.common.messages.common.PartitionKey;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 
 
-public class PreviousSettlementPriceConsumer extends DataConsumer {
+public class PreviousSettlementPriceConsumer extends KafkaDataConsumer {
     private static final Logger LOGGER = LoggerFactory.getLogger(PreviousSettlementPriceConsumer.class);
     private static final PartitionKey PARTITION_ZERO_KEY = new PartitionKey(KafkaTopicEnum.PREVIOUS_SETTLEMENT_PRICE_DATA, 0);
     private final CountDownLatch countDownLatch;
@@ -30,7 +30,7 @@ public class PreviousSettlementPriceConsumer extends DataConsumer {
         this.countDownLatch = countDownLatch;
     }
 
-    @KafkaListener(id = "previous-settlement-price-data-consumer-0",
+    @KafkaListener(id = "event-generator-previous-settlement-price-data-consumer-0",
             topicPartitions = {@TopicPartition(topic = "previous-settlement-price-data", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0"))}
     )
     public void listenPreviousSettlementPriceDataPartitionZero(ConsumerRecord<String, String> consumerRecord) {
