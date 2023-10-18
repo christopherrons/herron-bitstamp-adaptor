@@ -30,7 +30,7 @@ public class BitstampUtil {
                 .price(Price.create(addOrder.price()))
                 .participant(addOrder.participant())
                 .orderType(addOrder.orderType())
-                .orderExecutionType(addOrder.orderExecutionType())
+                .timeInForce(addOrder.timeInForce())
                 .addOperationType(addOrder.addOperationType())
                 .orderbookId(ID)
                 .build();

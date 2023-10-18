@@ -3,8 +3,8 @@ package com.herron.exchange.eventgenerator.server.emulation;
 import com.herron.exchange.common.api.common.api.referencedata.orderbook.OrderbookData;
 import com.herron.exchange.common.api.common.api.trading.orders.AddOrder;
 import com.herron.exchange.common.api.common.enums.OrderAddOperationTypeEnum;
-import com.herron.exchange.common.api.common.enums.OrderExecutionTypeEnum;
 import com.herron.exchange.common.api.common.enums.OrderSideEnum;
+import com.herron.exchange.common.api.common.enums.TimeInForceEnum;
 import com.herron.exchange.common.api.common.messages.common.Price;
 import com.herron.exchange.common.api.common.messages.common.Volume;
 import com.herron.exchange.common.api.common.messages.trading.ImmutableDefaultAddOrder;
@@ -14,9 +14,9 @@ import java.time.Instant;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static com.herron.exchange.common.api.common.enums.OrderExecutionTypeEnum.*;
 import static com.herron.exchange.common.api.common.enums.OrderTypeEnum.LIMIT;
 import static com.herron.exchange.common.api.common.enums.OrderTypeEnum.MARKET;
+import static com.herron.exchange.common.api.common.enums.TimeInForceEnum.*;
 
 public class EmulationUtil {
     private static final Random RANDOM_GENERATOR = new Random(17);
@@ -35,7 +35,7 @@ public class EmulationUtil {
                 .price(Price.create(price))
                 .participant(EventGeneratorUtils.generateParticipant())
                 .orderType(LIMIT)
-                .orderExecutionType(FILL)
+                .timeInForce(FILL)
                 .orderbookId(orderbookData.orderbookId())
                 .build();
     }
@@ -44,11 +44,11 @@ public class EmulationUtil {
 
         double volume = RANDOM_GENERATOR.nextDouble(orderbookData.minTradeVolume(), 100.0);
 
-        OrderExecutionTypeEnum executionTypeEnum = FILL;
+        TimeInForceEnum timeInForceEnum = FILL;
         if (RANDOM_GENERATOR.nextDouble() <= 0.05) {
-            executionTypeEnum = FAK;
+            timeInForceEnum = FAK;
         } else if (RANDOM_GENERATOR.nextDouble() >= 0.95) {
-            executionTypeEnum = FOK;
+            timeInForceEnum = FOK;
         }
 
         return ImmutableDefaultAddOrder.builder()
@@ -62,7 +62,7 @@ public class EmulationUtil {
                 .price(Price.create(price))
                 .participant(EventGeneratorUtils.generateParticipant())
                 .orderType(RANDOM_GENERATOR.nextDouble() < 0.01 ? MARKET : LIMIT)
-                .orderExecutionType(executionTypeEnum)
+                .timeInForce(timeInForceEnum)
                 .orderbookId(orderbookData.orderbookId())
                 .build();
     }
