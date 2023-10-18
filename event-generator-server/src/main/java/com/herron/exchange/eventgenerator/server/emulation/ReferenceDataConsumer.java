@@ -34,7 +34,7 @@ public class ReferenceDataConsumer extends DataConsumer {
     @KafkaListener(id = "reference-data-consumer-0",
             topicPartitions = {@TopicPartition(topic = "reference-data", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0"))}
     )
-    public void listenReferenceDataPartitionZero(ConsumerRecord<String, String> consumerRecord) {
+    public void consumerReferenceDataPartitionZero(ConsumerRecord<String, String> consumerRecord) {
         var broadCastMessage = deserializeBroadcast(consumerRecord, PARTITION_ZERO_KEY);
         if (broadCastMessage != null) {
             handleMessage(broadCastMessage.message());

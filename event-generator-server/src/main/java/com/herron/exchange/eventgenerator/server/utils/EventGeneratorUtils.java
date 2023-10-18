@@ -10,12 +10,12 @@ import java.util.stream.IntStream;
 public class EventGeneratorUtils {
 
     private static final Faker NAME_FAKER = new Faker();
-    private static final List<String> USER_POOL = IntStream.range(0, 5000).mapToObj(k -> generateUser()).toList();
+    private static final List<String> USER_POOL = IntStream.range(0, 10000).mapToObj(k -> generateUser()).toList();
 
     private static final Random RANDOM_UNIFORM = new Random();
 
     public static Participant generateParticipant() {
-        return new Participant("Emulation", generateUser());
+        return new Participant("Emulation", getUserFromPool());
     }
 
     public static Participant generateParticipant(String member) {

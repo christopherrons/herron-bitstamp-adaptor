@@ -16,7 +16,7 @@ public class KafkaTopicConfig {
     @Bean
     public NewTopic bitstampMarketDataTopic() {
         return TopicBuilder
-                .name(KafkaTopicEnum.ORDER_DATA.getTopicName())
+                .name(KafkaTopicEnum.USER_ORDER_DATA.getTopicName())
                 .partitions(nrOfPartitions)
                 .build();
     }

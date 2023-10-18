@@ -20,9 +20,10 @@ import static com.herron.exchange.eventgenerator.server.emulation.EmulationUtil.
 
 public class OrderEventEmulatorBroadcaster {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderEventEmulatorBroadcaster.class);
-    public static final PartitionKey KEY = new PartitionKey(KafkaTopicEnum.ORDER_DATA, 0);
+    public static final PartitionKey KEY = new PartitionKey(KafkaTopicEnum.USER_ORDER_DATA, 0);
     private static final Random RANDOM_GENERATOR = new Random(17);
     private static final int PRICE_LEVELS_PER_SIDE = 10;
+    private static final int EVENTS_PER_SECOND = 5000;
     private static final double ORDER_TRADE_RATIO = 1 / 10.0;
     private final KafkaBroadcastHandler broadcastHandler;
     private final CountDownLatch emulationCountdownLatch;
@@ -50,12 +51,24 @@ public class OrderEventEmulatorBroadcaster {
         }
 
         LOGGER.info("Init emulation.");
-
         Map<OrderbookData, AddOrder> orderbookToInitialOrder = createAndBroadcastInitialOrders();
         List<OrderbookData> orderbookDataList = new ArrayList<>(orderbookToInitialOrder.keySet());
 
-        while (true) {
+        runSimulation(orderbookToInitialOrder, orderbookDataList);
+    }
+
+    private void runSimulation(Map<OrderbookData, AddOrder> orderbookToInitialOrder, List<OrderbookData> orderbookDataList) {
+        long nrOfEventsGenerated = 0;
+        while (nrOfEventsGenerated < Long.MAX_VALUE) {
+            if (nrOfEventsGenerated % EVENTS_PER_SECOND == 0) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ignore) {
+
+                }
+            }
             generateEvent(orderbookToInitialOrder, orderbookDataList);
+            nrOfEventsGenerated++;
         }
     }
 
