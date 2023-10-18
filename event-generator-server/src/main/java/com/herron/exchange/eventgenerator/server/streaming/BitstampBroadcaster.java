@@ -1,7 +1,7 @@
 package com.herron.exchange.eventgenerator.server.streaming;
 
 import com.herron.exchange.common.api.common.api.Event;
-import com.herron.exchange.common.api.common.api.trading.orders.AddOrder;
+import com.herron.exchange.common.api.common.api.trading.orders.Order;
 import com.herron.exchange.common.api.common.datastructures.TimeBoundBlockingPriorityQueue;
 import com.herron.exchange.common.api.common.enums.KafkaTopicEnum;
 import com.herron.exchange.common.api.common.kafka.KafkaBroadcastHandler;
@@ -11,6 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+
+import static com.herron.exchange.common.api.common.enums.OrderOperationEnum.INSERT;
 
 public class BitstampBroadcaster {
     private static final Logger LOGGER = LoggerFactory.getLogger(BitstampBroadcaster.class);
@@ -44,14 +46,14 @@ public class BitstampBroadcaster {
                 continue;
             }
 
-            if (message instanceof AddOrder order) {
+            if (message instanceof Order order && order.orderOperation() == INSERT) {
                 // Since we have our own trading engine we only handle add orders
                 handleOrder(order);
             }
         }
     }
 
-    private void handleOrder(AddOrder order) {
+    private void handleOrder(Order order) {
         if (order.currentVolume().getValue() <= 0 || order.price().getValue() <= 0) {
             return;
         }

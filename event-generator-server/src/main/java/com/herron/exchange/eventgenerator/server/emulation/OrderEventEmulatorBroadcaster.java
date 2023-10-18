@@ -1,7 +1,7 @@
 package com.herron.exchange.eventgenerator.server.emulation;
 
 import com.herron.exchange.common.api.common.api.referencedata.orderbook.OrderbookData;
-import com.herron.exchange.common.api.common.api.trading.orders.AddOrder;
+import com.herron.exchange.common.api.common.api.trading.orders.Order;
 import com.herron.exchange.common.api.common.cache.ReferenceDataCache;
 import com.herron.exchange.common.api.common.enums.KafkaTopicEnum;
 import com.herron.exchange.common.api.common.enums.OrderSideEnum;
@@ -16,7 +16,7 @@ import java.util.concurrent.CountDownLatch;
 import static com.herron.exchange.common.api.common.enums.OrderSideEnum.ASK;
 import static com.herron.exchange.common.api.common.enums.OrderSideEnum.BID;
 import static com.herron.exchange.eventgenerator.server.emulation.EmulationUtil.mapAddOrder;
-import static com.herron.exchange.eventgenerator.server.emulation.EmulationUtil.mapInitialAddOrder;
+import static com.herron.exchange.eventgenerator.server.emulation.EmulationUtil.mapLimitOrder;
 
 public class OrderEventEmulatorBroadcaster {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderEventEmulatorBroadcaster.class);
@@ -51,13 +51,13 @@ public class OrderEventEmulatorBroadcaster {
         }
 
         LOGGER.info("Init emulation.");
-        Map<OrderbookData, AddOrder> orderbookToInitialOrder = createAndBroadcastInitialOrders();
+        Map<OrderbookData, Order> orderbookToInitialOrder = createAndBroadcastInitialOrders();
         List<OrderbookData> orderbookDataList = new ArrayList<>(orderbookToInitialOrder.keySet());
 
         runSimulation(orderbookToInitialOrder, orderbookDataList);
     }
 
-    private void runSimulation(Map<OrderbookData, AddOrder> orderbookToInitialOrder, List<OrderbookData> orderbookDataList) {
+    private void runSimulation(Map<OrderbookData, Order> orderbookToInitialOrder, List<OrderbookData> orderbookDataList) {
         long nrOfEventsGenerated = 0;
         while (nrOfEventsGenerated < Long.MAX_VALUE) {
             if (nrOfEventsGenerated % EVENTS_PER_SECOND == 0) {
@@ -72,23 +72,23 @@ public class OrderEventEmulatorBroadcaster {
         }
     }
 
-    private Map<OrderbookData, AddOrder> createAndBroadcastInitialOrders() {
+    private Map<OrderbookData, Order> createAndBroadcastInitialOrders() {
         var instrumentIdToSettlementPrice = settlementPriceConsumer.getInstrumentIdToPreviousSettlementPrices();
-        Map<OrderbookData, AddOrder> orderbookToInitialOrder = new HashMap<>();
+        Map<OrderbookData, Order> orderbookToInitialOrder = new HashMap<>();
         for (var orderbookData : ReferenceDataCache.getCache().getOrderbookData()) {
             if (!instrumentIdToSettlementPrice.containsKey(orderbookData.instrument().instrumentId())) {
                 continue;
             }
 
             var startPrice = instrumentIdToSettlementPrice.get(orderbookData.instrument().instrumentId()).price().getValue();
-            var addOrder = mapInitialAddOrder(orderbookData, startPrice, RANDOM_GENERATOR.nextBoolean() ? BID : ASK);
+            var addOrder = mapLimitOrder(orderbookData, startPrice, RANDOM_GENERATOR.nextBoolean() ? BID : ASK);
             orderbookToInitialOrder.put(orderbookData, addOrder);
             broadcastHandler.broadcastMessage(KEY, addOrder);
         }
         return orderbookToInitialOrder;
     }
 
-    private void generateEvent(Map<OrderbookData, AddOrder> orderbookToInitialOrder, List<OrderbookData> orderbookDataList) {
+    private void generateEvent(Map<OrderbookData, Order> orderbookToInitialOrder, List<OrderbookData> orderbookDataList) {
         var instrumentIdToSettlementPrice = settlementPriceConsumer.getInstrumentIdToPreviousSettlementPrices();
         var orderbookData = orderbookDataList.get(RANDOM_GENERATOR.nextInt(orderbookDataList.size()));
         var initialOrder = orderbookToInitialOrder.get(orderbookData);
