@@ -81,7 +81,7 @@ public class OrderEventEmulatorBroadcaster {
                 continue;
             }
 
-            var startPrice = instrumentIdToSettlementPrice.get(orderbookData.instrument().instrumentId()).price().getValue();
+            var startPrice = instrumentIdToSettlementPrice.get(orderbookData.instrument().instrumentId()).price();
             var addOrder = mapLimitOrder(orderbookData, startPrice, RANDOM_GENERATOR.nextBoolean() ? BID : ASK);
             orderbookToInitialOrder.put(orderbookData, addOrder);
             broadcastHandler.broadcastMessage(KEY, addOrder);
@@ -97,13 +97,13 @@ public class OrderEventEmulatorBroadcaster {
             return;
         }
 
-        var startPrice = instrumentIdToSettlementPrice.get(orderbookData.instrument().instrumentId()).price().getValue();
-        var price = startPrice + (orderbookData.tickSize() * RANDOM_GENERATOR.nextInt(0, PRICE_LEVELS_PER_SIDE));
+        var startPrice = instrumentIdToSettlementPrice.get(orderbookData.instrument().instrumentId()).price();
+        var price = startPrice.add(orderbookData.tickSize() * RANDOM_GENERATOR.nextInt(0, PRICE_LEVELS_PER_SIDE));
 
         OrderSideEnum side = RANDOM_GENERATOR.nextBoolean() ? BID : ASK;
-        if (initialOrder.orderSide() == side && initialOrder.orderSide() == BID && price > startPrice) {
+        if (initialOrder.orderSide() == side && initialOrder.orderSide() == BID && price.gt(startPrice)) {
             side = RANDOM_GENERATOR.nextDouble() <= ORDER_TRADE_RATIO ? BID : ASK;
-        } else if (initialOrder.orderSide() == side && initialOrder.orderSide() == ASK && price < startPrice) {
+        } else if (initialOrder.orderSide() == side && initialOrder.orderSide() == ASK && price.lt(startPrice)) {
             side = RANDOM_GENERATOR.nextDouble() <= ORDER_TRADE_RATIO ? ASK : BID;
         }
 

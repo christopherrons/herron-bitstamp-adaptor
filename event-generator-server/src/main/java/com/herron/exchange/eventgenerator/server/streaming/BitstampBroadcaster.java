@@ -54,7 +54,7 @@ public class BitstampBroadcaster {
     }
 
     private void handleOrder(Order order) {
-        if (order.currentVolume().getValue() <= 0 || order.price().getValue() <= 0) {
+        if (order.currentVolume().leq(0) || order.price().leq(0)) {
             return;
         }
 
