@@ -8,7 +8,7 @@ spring:
 kafka:
   topic:
     order-data:
-      nr-of-partitions: 1
+      nr-of-partitions: 2
 
 subscription-config:
   uri: wss://ws.bitstamp.net

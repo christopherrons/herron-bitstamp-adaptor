@@ -25,7 +25,7 @@ public class OrderEventEmulatorBroadcaster {
     private static final Random RANDOM_GENERATOR = new Random(17);
     private static final int PRICE_LEVELS_PER_SIDE = 10;
     private static final int MAX_EVENTS_PER_SECOND = 5000;
-    private static final double ORDER_TRADE_RATIO = 1 / 10.0;
+    private static final double ORDER_TRADE_RATIO = 1 / 20.0;
     private final KafkaBroadcastHandler broadcastHandler;
     private final CountDownLatch emulationCountdownLatch;
     private final PreviousSettlementPriceConsumer settlementPriceConsumer;
