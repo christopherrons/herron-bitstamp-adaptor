@@ -4,9 +4,9 @@ import com.herron.exchange.common.api.common.api.referencedata.orderbook.Orderbo
 import com.herron.exchange.common.api.common.api.trading.orders.LimitOrder;
 import com.herron.exchange.common.api.common.api.trading.orders.MarketOrder;
 import com.herron.exchange.common.api.common.api.trading.orders.Order;
-import com.herron.exchange.common.api.common.enums.OrderOperationEnum;
 import com.herron.exchange.common.api.common.enums.OrderSideEnum;
 import com.herron.exchange.common.api.common.enums.TimeInForceEnum;
+import com.herron.exchange.common.api.common.math.MathUtils;
 import com.herron.exchange.common.api.common.messages.common.Price;
 import com.herron.exchange.common.api.common.messages.common.Volume;
 import com.herron.exchange.common.api.common.messages.trading.ImmutableDefaultLimitOrder;
@@ -17,6 +17,7 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.herron.exchange.common.api.common.enums.OrderOperationCauseEnum.NEW_ORDER;
+import static com.herron.exchange.common.api.common.enums.OrderOperationEnum.INSERT;
 import static com.herron.exchange.common.api.common.enums.TimeInForceEnum.*;
 import static com.herron.exchange.eventgenerator.server.utils.EventGeneratorUtils.generateParticipant;
 
@@ -29,7 +30,7 @@ public class EmulationUtil {
     }
 
     public static LimitOrder mapLimitOrder(OrderbookData orderbookData, double price, OrderSideEnum sideEnum, TimeInForceEnum timeInForceEnum) {
-        double volume = RANDOM_GENERATOR.nextDouble(orderbookData.minTradeVolume(), 100.0);
+        double volume = MathUtils.roundDouble(RANDOM_GENERATOR.nextDouble(orderbookData.minTradeVolume(), 100.0), 5);
         return ImmutableDefaultLimitOrder.builder()
                 .timeOfEventMs(Instant.now().toEpochMilli())
                 .orderId(String.valueOf(ORDER_ID_GENERATOR.getAndIncrement()))
@@ -40,14 +41,14 @@ public class EmulationUtil {
                 .price(Price.create(price))
                 .participant(generateParticipant())
                 .timeInForce(timeInForceEnum)
-                .orderOperation(OrderOperationEnum.INSERT)
+                .orderOperation(INSERT)
                 .orderOperationCause(NEW_ORDER)
                 .orderbookId(orderbookData.orderbookId())
                 .build();
     }
 
     public static MarketOrder mapMarketOrder(OrderbookData orderbookData, OrderSideEnum sideEnum) {
-        double volume = RANDOM_GENERATOR.nextDouble(orderbookData.minTradeVolume(), 100.0);
+        double volume = MathUtils.roundDouble(RANDOM_GENERATOR.nextDouble(orderbookData.minTradeVolume(), 100.0), 5);
         return ImmutableDefaultMarketOrder.builder()
                 .timeOfEventMs(Instant.now().toEpochMilli())
                 .orderId(String.valueOf(ORDER_ID_GENERATOR.getAndIncrement()))
@@ -56,7 +57,7 @@ public class EmulationUtil {
                 .instrumentId(orderbookData.instrument().instrumentId())
                 .orderSide(sideEnum)
                 .participant(generateParticipant())
-                .orderOperation(OrderOperationEnum.INSERT)
+                .orderOperation(INSERT)
                 .orderOperationCause(NEW_ORDER)
                 .orderbookId(orderbookData.orderbookId())
                 .build();
