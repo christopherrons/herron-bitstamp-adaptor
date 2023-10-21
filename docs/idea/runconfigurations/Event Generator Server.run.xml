@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Event Generator Server" type="Application" factoryName="Application" singleton="true">
+    <option name="MAIN_CLASS_NAME" value="com.herron.exchange.eventgenerator.server.EventGeneratorApplication" />
+    <module name="event-generator.event-generator-server.main" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/herron-event-generator/event-generator-deploy" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
