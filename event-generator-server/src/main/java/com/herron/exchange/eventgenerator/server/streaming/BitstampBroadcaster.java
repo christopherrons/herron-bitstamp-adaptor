@@ -1,12 +1,12 @@
 package com.herron.exchange.eventgenerator.server.streaming;
 
 import com.herron.exchange.common.api.common.api.Event;
-import com.herron.exchange.common.api.common.api.trading.orders.Order;
+import com.herron.exchange.common.api.common.api.trading.Order;
 import com.herron.exchange.common.api.common.datastructures.TimeBoundBlockingPriorityQueue;
 import com.herron.exchange.common.api.common.enums.KafkaTopicEnum;
 import com.herron.exchange.common.api.common.kafka.KafkaBroadcastHandler;
 import com.herron.exchange.common.api.common.messages.common.PartitionKey;
-import com.herron.exchange.integrations.generator.bitstamp.api.BitstampMessage;
+import com.herron.exchange.integrations.bitstamp.api.BitstampMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

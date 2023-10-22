@@ -1,8 +1,8 @@
 package com.herron.exchange.eventgenerator.server.streaming;
 
 import com.herron.exchange.eventgenerator.server.config.EventGeneratorConfig;
-import com.herron.exchange.integrations.generator.bitstamp.BitstampWebsocketClient;
-import com.herron.exchange.integrations.generator.bitstamp.model.BitstampWebsocketRequest;
+import com.herron.exchange.integrations.bitstamp.BitstampWebsocketClient;
+import com.herron.exchange.integrations.bitstamp.model.BitstampWebsocketRequest;
 
 
 public class BitstampConsumer {

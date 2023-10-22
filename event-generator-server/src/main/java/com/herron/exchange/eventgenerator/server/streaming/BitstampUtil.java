@@ -1,19 +1,20 @@
 package com.herron.exchange.eventgenerator.server.streaming;
 
 import com.herron.exchange.common.api.common.api.Event;
-import com.herron.exchange.common.api.common.api.trading.orders.LimitOrder;
-import com.herron.exchange.common.api.common.api.trading.orders.MarketOrder;
+import com.herron.exchange.common.api.common.enums.EventType;
 import com.herron.exchange.common.api.common.messages.common.Price;
 import com.herron.exchange.common.api.common.messages.common.Volume;
-import com.herron.exchange.common.api.common.messages.trading.ImmutableDefaultLimitOrder;
-import com.herron.exchange.common.api.common.messages.trading.ImmutableDefaultMarketOrder;
-import com.herron.exchange.integrations.generator.bitstamp.api.BitstampMessage;
-import com.herron.exchange.integrations.generator.bitstamp.messages.BitstampAddOrder;
+import com.herron.exchange.common.api.common.messages.trading.ImmutableLimitOrder;
+import com.herron.exchange.common.api.common.messages.trading.ImmutableMarketOrder;
+import com.herron.exchange.common.api.common.messages.trading.LimitOrder;
+import com.herron.exchange.common.api.common.messages.trading.MarketOrder;
+import com.herron.exchange.integrations.bitstamp.api.BitstampMessage;
+import com.herron.exchange.integrations.bitstamp.messages.BitstampAddOrder;
 
+import static com.herron.exchange.common.api.common.enums.EventType.USER;
 import static com.herron.exchange.common.api.common.enums.OrderTypeEnum.MARKET;
 
 public class BitstampUtil {
-    private static final String ID = "bitstamp_equity_btcusd";
 
     public static Event mapMessage(BitstampMessage bitstampMessage) {
         // We only care for add orders as this application servers as an event generator
@@ -24,32 +25,34 @@ public class BitstampUtil {
     }
 
     private static MarketOrder mapMarketOrder(BitstampAddOrder order) {
-        return ImmutableDefaultMarketOrder.builder()
+        return ImmutableMarketOrder.builder()
                 .timeOfEventMs(order.timeStampInMs())
                 .orderId(order.orderId())
                 .currentVolume(Volume.create(order.currentVolume()))
                 .initialVolume(Volume.create(order.initialVolume()))
-                .instrumentId(ID)
+                .instrumentId(order.orderbookId())
                 .orderSide(order.orderSide())
                 .participant(order.participant())
-                .orderbookId(ID)
+                .orderbookId(order.orderbookId())
+                .eventType(USER)
                 .orderOperationCause(order.orderOperationCauseEnum())
                 .orderOperation(order.orderOperation())
                 .build();
     }
 
     private static LimitOrder mapLimitOrder(BitstampAddOrder order) {
-        return ImmutableDefaultLimitOrder.builder()
+        return ImmutableLimitOrder.builder()
                 .timeOfEventMs(order.timeStampInMs())
                 .orderId(order.orderId())
                 .currentVolume(Volume.create(order.currentVolume()))
                 .initialVolume(Volume.create(order.initialVolume()))
-                .instrumentId(ID)
+                .instrumentId(order.orderbookId())
                 .orderSide(order.orderSide())
                 .price(Price.create(order.price()))
                 .participant(order.participant())
                 .timeInForce(order.timeInForce())
-                .orderbookId(ID)
+                .orderbookId(order.orderbookId())
+                .eventType(USER)
                 .orderOperationCause(order.orderOperationCauseEnum())
                 .orderOperation(order.orderOperation())
                 .build();
