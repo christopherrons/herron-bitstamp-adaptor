@@ -25,7 +25,6 @@ public class PreviousSettlementPriceConsumer extends DataConsumer implements Kaf
         super("Previous-Settlement-Price", new CountDownLatch(subscriptionDetails.size()));
         this.consumerClient = consumerClient;
         this.requests = subscriptionDetails.stream().map(d -> new KafkaSubscriptionRequest(d, this)).toList();
-
     }
 
     @Override
@@ -40,7 +39,11 @@ public class PreviousSettlementPriceConsumer extends DataConsumer implements Kaf
             switch (state.state()) {
                 case START -> logger.info("Started consuming previous day settlement price data.");
                 case DONE -> {
+                    consumerClient.stop(broadcastMessage.partitionKey());
                     countDownLatch.countDown();
+                    if (countDownLatch.getCount() == 0) {
+                        consumerComplete();
+                    }
                 }
             }
         } else if (message instanceof MarketDataPrice marketDataPrice) {
