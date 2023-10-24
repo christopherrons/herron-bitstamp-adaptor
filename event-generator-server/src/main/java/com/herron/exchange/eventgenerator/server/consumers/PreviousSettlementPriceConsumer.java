@@ -1,53 +1,46 @@
 package com.herron.exchange.eventgenerator.server.consumers;
 
 import com.herron.exchange.common.api.common.api.Message;
-import com.herron.exchange.common.api.common.api.MessageFactory;
-import com.herron.exchange.common.api.common.enums.KafkaTopicEnum;
-import com.herron.exchange.common.api.common.kafka.KafkaDataConsumer;
+import com.herron.exchange.common.api.common.api.kafka.KafkaMessageHandler;
+import com.herron.exchange.common.api.common.consumer.DataConsumer;
+import com.herron.exchange.common.api.common.kafka.KafkaConsumerClient;
+import com.herron.exchange.common.api.common.kafka.model.KafkaSubscriptionDetails;
+import com.herron.exchange.common.api.common.kafka.model.KafkaSubscriptionRequest;
+import com.herron.exchange.common.api.common.messages.BroadcastMessage;
 import com.herron.exchange.common.api.common.messages.common.DataStreamState;
-import com.herron.exchange.common.api.common.messages.common.PartitionKey;
 import com.herron.exchange.common.api.common.messages.marketdata.entries.MarketDataPrice;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.annotation.PartitionOffset;
-import org.springframework.kafka.annotation.TopicPartition;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 
 
-public class PreviousSettlementPriceConsumer extends KafkaDataConsumer {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PreviousSettlementPriceConsumer.class);
-    private static final PartitionKey PARTITION_ZERO_KEY = new PartitionKey(KafkaTopicEnum.PREVIOUS_SETTLEMENT_PRICE_DATA, 0);
-    private final CountDownLatch countDownLatch;
+public class PreviousSettlementPriceConsumer extends DataConsumer implements KafkaMessageHandler {
+    private final KafkaConsumerClient consumerClient;
+    private final List<KafkaSubscriptionRequest> requests;
     private final Map<String, MarketDataPrice> instrumentIdToPreviousSettlementPrices = new ConcurrentHashMap<>();
 
-    public PreviousSettlementPriceConsumer(CountDownLatch countDownLatch, MessageFactory messageFactory) {
-        super(messageFactory);
-        this.countDownLatch = countDownLatch;
+    public PreviousSettlementPriceConsumer(KafkaConsumerClient consumerClient, List<KafkaSubscriptionDetails> subscriptionDetails) {
+        super("Previous-Settlement-Price", new CountDownLatch(subscriptionDetails.size()));
+        this.consumerClient = consumerClient;
+        this.requests = subscriptionDetails.stream().map(d -> new KafkaSubscriptionRequest(d, this)).toList();
+
     }
 
-    @KafkaListener(id = "event-generator-previous-settlement-price-data-consumer-0",
-            topicPartitions = {@TopicPartition(topic = "previous-settlement-price-data", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0"))}
-    )
-    public void listenPreviousSettlementPriceDataPartitionZero(ConsumerRecord<String, String> consumerRecord) {
-        var broadCastMessage = deserializeBroadcast(consumerRecord, PARTITION_ZERO_KEY);
-        if (broadCastMessage != null) {
-            handleMessage(broadCastMessage.message());
-        }
+    @Override
+    public void consumerInit() {
+        requests.forEach(consumerClient::subscribeToBroadcastTopic);
     }
 
-    private void handleMessage(Message message) {
+    @Override
+    public void onMessage(BroadcastMessage broadcastMessage) {
+        Message message = broadcastMessage.message();
         if (message instanceof DataStreamState state) {
             switch (state.state()) {
-                case START -> LOGGER.info("Started consuming previous day settlement price data.");
+                case START -> logger.info("Started consuming previous day settlement price data.");
                 case DONE -> {
-                    var count = countDownLatch.getCount();
                     countDownLatch.countDown();
-                    LOGGER.info("Done consuming {} previous day settlement price data, countdown latch from {} to {}.", getTotalNumberOfEvents(), count, countDownLatch.getCount());
                 }
             }
         } else if (message instanceof MarketDataPrice marketDataPrice) {
@@ -58,4 +51,6 @@ public class PreviousSettlementPriceConsumer extends KafkaDataConsumer {
     public Map<String, MarketDataPrice> getInstrumentIdToPreviousSettlementPrices() {
         return instrumentIdToPreviousSettlementPrices;
     }
+
+
 }

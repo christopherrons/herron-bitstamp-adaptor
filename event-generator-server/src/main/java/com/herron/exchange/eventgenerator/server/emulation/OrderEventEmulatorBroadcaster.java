@@ -7,12 +7,14 @@ import com.herron.exchange.common.api.common.enums.KafkaTopicEnum;
 import com.herron.exchange.common.api.common.enums.OrderSideEnum;
 import com.herron.exchange.common.api.common.kafka.KafkaBroadcastHandler;
 import com.herron.exchange.common.api.common.messages.common.PartitionKey;
+import com.herron.exchange.common.api.common.wrappers.ThreadWrapper;
 import com.herron.exchange.eventgenerator.server.consumers.PreviousSettlementPriceConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static com.herron.exchange.common.api.common.enums.OrderSideEnum.ASK;
 import static com.herron.exchange.common.api.common.enums.OrderSideEnum.BID;
@@ -27,30 +29,21 @@ public class OrderEventEmulatorBroadcaster {
     private static final int MAX_EVENTS_PER_SECOND = 5000;
     private static final double ORDER_TRADE_RATIO = 1 / 20.0;
     private final KafkaBroadcastHandler broadcastHandler;
-    private final CountDownLatch emulationCountdownLatch;
     private final PreviousSettlementPriceConsumer settlementPriceConsumer;
-    private final Thread emulatorThread;
+    private final ExecutorService service;
 
     public OrderEventEmulatorBroadcaster(KafkaBroadcastHandler broadcastHandler,
-                                         CountDownLatch emulationCountdownLatch,
                                          PreviousSettlementPriceConsumer settlementPriceConsumer) {
         this.broadcastHandler = broadcastHandler;
-        this.emulationCountdownLatch = emulationCountdownLatch;
         this.settlementPriceConsumer = settlementPriceConsumer;
-        this.emulatorThread = new Thread(this::runSimulation, this.getClass().getSimpleName());
+        this.service = Executors.newSingleThreadExecutor(new ThreadWrapper("EMULATION"));
     }
 
     public void init() {
-        emulatorThread.start();
+        service.execute(this::runSimulation);
     }
 
     private void runSimulation() {
-        try {
-            emulationCountdownLatch.await();
-        } catch (InterruptedException ignore) {
-            //Ignore
-        }
-
         LOGGER.info("Init emulation.");
         Map<OrderbookData, Order> orderbookToInitialOrder = createAndBroadcastInitialOrders();
         List<OrderbookData> orderbookDataList = new ArrayList<>(orderbookToInitialOrder.keySet());

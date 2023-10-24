@@ -1,16 +1,33 @@
 server:
   port: 8081
 
-spring:
-  kafka:
-    bootstrap-servers: "localhost:9092"
-
 kafka:
-  topic:
-    order-data:
-      nr-of-partitions: 2
+  bootstrap-servers: "localhost:9092"
+  producer:
+    topic:
+      user-order-data:
+        nr-of-partitions: 2
+    broadcast:
+      config:
+        - partition: 0
+          event-logging: 50000
+          topic: "user-order-data"
+        - partition: 1
+          event-logging: 500
+          topic: "user-order-data"
+  consumer:
+    config:
+      - offset: 0
+        partition: 0
+        event-logging: 1000
+        topic: "previous-settlement-price-data"
+      - offset: 0
+        partition: 0
+        event-logging: 1000
+        topic: "reference-data"
 
-subscription-config:
-  uri: wss://ws.bitstamp.net
-  channels:
-    - live_orders_btcusd
+bitstamp:
+  subscription-config:
+    uri: wss://ws.bitstamp.net
+    channels:
+      - live_orders_btcusd

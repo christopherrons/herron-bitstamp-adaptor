@@ -7,21 +7,21 @@ import com.herron.exchange.integrations.bitstamp.model.BitstampWebsocketRequest;
 
 public class BitstampConsumer {
 
-    private final EventGeneratorConfig.SubscriptionDetailConfig subscriptionDetailConfig;
+    private final EventGeneratorConfig.BitstampSubscriptionDetailConfig bitstampSubscriptionDetailConfig;
     private final BitstampBroadcaster bitstampMessageBroadcaster;
     private final BitstampWebsocketClient client;
 
-    public BitstampConsumer(EventGeneratorConfig.SubscriptionDetailConfig subscriptionDetailConfig,
+    public BitstampConsumer(EventGeneratorConfig.BitstampSubscriptionDetailConfig bitstampSubscriptionDetailConfig,
                             BitstampBroadcaster bitstampBroadcaster,
                             BitstampWebsocketClient client) {
-        this.subscriptionDetailConfig = subscriptionDetailConfig;
+        this.bitstampSubscriptionDetailConfig = bitstampSubscriptionDetailConfig;
         this.bitstampMessageBroadcaster = bitstampBroadcaster;
         this.client = client;
     }
 
     public void init() {
-        subscriptionDetailConfig.getChannels().forEach(ch -> {
-            var request = new BitstampWebsocketRequest(subscriptionDetailConfig.getUri(), ch);
+        bitstampSubscriptionDetailConfig.getChannels().forEach(ch -> {
+            var request = new BitstampWebsocketRequest(bitstampSubscriptionDetailConfig.getUri(), ch);
             client.subscribe(bitstampMessageBroadcaster::handleMessage, request);
         });
     }
