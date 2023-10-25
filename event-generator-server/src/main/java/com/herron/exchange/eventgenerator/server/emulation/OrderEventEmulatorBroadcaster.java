@@ -26,14 +26,17 @@ public class OrderEventEmulatorBroadcaster {
     public static final PartitionKey KEY = new PartitionKey(KafkaTopicEnum.USER_ORDER_DATA, 0);
     private static final Random RANDOM_GENERATOR = new Random(17);
     private static final int PRICE_LEVELS_PER_SIDE = 10;
-    private static final int MAX_EVENTS_PER_SECOND = 5000;
     private static final double ORDER_TRADE_RATIO = 1 / 20.0;
     private final KafkaBroadcastHandler broadcastHandler;
     private final PreviousSettlementPriceConsumer settlementPriceConsumer;
     private final ExecutorService service;
+    private final int maxEventsPerSecond;
 
-    public OrderEventEmulatorBroadcaster(KafkaBroadcastHandler broadcastHandler,
+
+    public OrderEventEmulatorBroadcaster(int maxEventsPerSecond,
+                                         KafkaBroadcastHandler broadcastHandler,
                                          PreviousSettlementPriceConsumer settlementPriceConsumer) {
+        this.maxEventsPerSecond = maxEventsPerSecond;
         this.broadcastHandler = broadcastHandler;
         this.settlementPriceConsumer = settlementPriceConsumer;
         this.service = Executors.newSingleThreadExecutor(new ThreadWrapper("EMULATION"));
@@ -54,7 +57,7 @@ public class OrderEventEmulatorBroadcaster {
     private void runSimulation(Map<OrderbookData, Order> orderbookToInitialOrder, List<OrderbookData> orderbookDataList) {
         long nrOfEventsGenerated = 0;
         while (nrOfEventsGenerated < Long.MAX_VALUE) {
-            if (nrOfEventsGenerated % MAX_EVENTS_PER_SECOND == 0) {
+            if (nrOfEventsGenerated % maxEventsPerSecond == 0) {
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException ignore) {

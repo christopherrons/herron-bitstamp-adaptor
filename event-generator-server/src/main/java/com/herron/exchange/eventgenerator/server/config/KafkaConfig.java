@@ -8,8 +8,6 @@ import com.herron.exchange.common.api.common.kafka.KafkaConsumerClient;
 import com.herron.exchange.common.api.common.kafka.model.KafkaSubscriptionDetails;
 import com.herron.exchange.common.api.common.logging.EventLogger;
 import com.herron.exchange.common.api.common.messages.common.PartitionKey;
-import com.herron.exchange.eventgenerator.server.emulation.OrderEventEmulatorBroadcaster;
-import com.herron.exchange.eventgenerator.server.streaming.BitstampBroadcaster;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -28,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Configuration
 public class KafkaConfig {
@@ -36,11 +33,7 @@ public class KafkaConfig {
 
     @Bean
     public KafkaBroadcastHandler kafkaBroadcastHandler(KafkaTemplate<String, Object> kafkaTemplate, KafkaConfig.KafkaProducerConfig config) {
-        return new KafkaBroadcastHandler(kafkaTemplate,
-                Stream.of(OrderEventEmulatorBroadcaster.KEY, BitstampBroadcaster.KEY)
-                        .map(k -> config.createBroadcastProducer(k, kafkaTemplate))
-                        .collect(Collectors.toMap(KafkaBroadcastProducer::getPartitionKey, k -> k))
-        );
+        return new KafkaBroadcastHandler(kafkaTemplate, config.createBroadcastProducer(kafkaTemplate));
     }
 
     @Bean
@@ -98,11 +91,13 @@ public class KafkaConfig {
                                        String topic) {
         }
 
-        KafkaBroadcastProducer createBroadcastProducer(PartitionKey partitionKey, KafkaTemplate<String, Object> kafkaTemplate) {
+        Map<PartitionKey, KafkaBroadcastProducer> createBroadcastProducer(KafkaTemplate<String, Object> kafkaTemplate) {
             return config.stream()
-                    .filter(c -> c.topic.equals(partitionKey.topicEnum().getTopicName()) && c.partition == partitionKey.partitionId())
-                    .map(c -> new KafkaBroadcastProducer(partitionKey, kafkaTemplate, new EventLogger(partitionKey.toString(), c.eventLogging)))
-                    .findFirst().orElse(null);
+                    .map(c -> {
+                        var pk = new PartitionKey(KafkaTopicEnum.fromValue(c.topic()), c.partition());
+                        return new KafkaBroadcastProducer(pk, kafkaTemplate, new EventLogger(pk.toString(), c.eventLogging));
+                    })
+                    .collect(Collectors.toMap(KafkaBroadcastProducer::getPartitionKey, k -> k));
         }
     }
 

@@ -26,6 +26,9 @@ kafka:
         event-logging: 1000
         topic: "reference-data"
 
+emulation:
+  max-event-per-second: 5000
+
 bitstamp:
   subscription-config:
     uri: wss://ws.bitstamp.net

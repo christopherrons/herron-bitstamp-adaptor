@@ -11,6 +11,7 @@ import com.herron.exchange.eventgenerator.server.emulation.OrderEventEmulatorBro
 import com.herron.exchange.eventgenerator.server.streaming.BitstampBroadcaster;
 import com.herron.exchange.eventgenerator.server.streaming.BitstampConsumer;
 import com.herron.exchange.integrations.bitstamp.BitstampWebsocketClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,8 +42,10 @@ public class EventGeneratorConfig {
     }
 
     @Bean
-    public OrderEventEmulatorBroadcaster orderEventEmulator(KafkaBroadcastHandler kafkaBroadcastHandler, PreviousSettlementPriceConsumer previousSettlementPriceConsumer) {
-        return new OrderEventEmulatorBroadcaster(kafkaBroadcastHandler, previousSettlementPriceConsumer);
+    public OrderEventEmulatorBroadcaster orderEventEmulator(@Value("${emulation.max-event-per-second:5000}") int maxEventsPerSecond,
+                                                            KafkaBroadcastHandler kafkaBroadcastHandler,
+                                                            PreviousSettlementPriceConsumer previousSettlementPriceConsumer) {
+        return new OrderEventEmulatorBroadcaster(maxEventsPerSecond, kafkaBroadcastHandler, previousSettlementPriceConsumer);
     }
 
     @Bean
