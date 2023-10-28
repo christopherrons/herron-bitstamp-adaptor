@@ -5,13 +5,13 @@ import com.herron.exchange.common.api.common.api.trading.Order;
 import com.herron.exchange.common.api.common.enums.OrderSideEnum;
 import com.herron.exchange.common.api.common.enums.TimeInForceEnum;
 import com.herron.exchange.common.api.common.messages.common.Price;
+import com.herron.exchange.common.api.common.messages.common.Timestamp;
 import com.herron.exchange.common.api.common.messages.common.Volume;
 import com.herron.exchange.common.api.common.messages.trading.ImmutableLimitOrder;
 import com.herron.exchange.common.api.common.messages.trading.ImmutableMarketOrder;
 import com.herron.exchange.common.api.common.messages.trading.LimitOrder;
 import com.herron.exchange.common.api.common.messages.trading.MarketOrder;
 
-import java.time.Instant;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -32,7 +32,7 @@ public class EmulationUtil {
     public static LimitOrder mapLimitOrder(OrderbookData orderbookData, Price price, OrderSideEnum sideEnum, TimeInForceEnum timeInForceEnum) {
         double volume = RANDOM_GENERATOR.nextDouble(orderbookData.minTradeVolume(), 100.0);
         return ImmutableLimitOrder.builder()
-                .timeOfEventMs(Instant.now().toEpochMilli())
+                .timeOfEvent(Timestamp.now())
                 .orderId(String.valueOf(ORDER_ID_GENERATOR.getAndIncrement()))
                 .currentVolume(Volume.create(volume).scale(5))
                 .initialVolume(Volume.create(volume).scale(5))
@@ -51,7 +51,7 @@ public class EmulationUtil {
     public static MarketOrder mapMarketOrder(OrderbookData orderbookData, OrderSideEnum sideEnum) {
         double volume = RANDOM_GENERATOR.nextDouble(orderbookData.minTradeVolume(), 100.0);
         return ImmutableMarketOrder.builder()
-                .timeOfEventMs(Instant.now().toEpochMilli())
+                .timeOfEvent(Timestamp.now())
                 .orderId(String.valueOf(ORDER_ID_GENERATOR.getAndIncrement()))
                 .currentVolume(Volume.create(volume).scale(5))
                 .initialVolume(Volume.create(volume).scale(5))

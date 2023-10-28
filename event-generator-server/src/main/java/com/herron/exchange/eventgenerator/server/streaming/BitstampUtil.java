@@ -1,8 +1,8 @@
 package com.herron.exchange.eventgenerator.server.streaming;
 
 import com.herron.exchange.common.api.common.api.Event;
-import com.herron.exchange.common.api.common.enums.EventType;
 import com.herron.exchange.common.api.common.messages.common.Price;
+import com.herron.exchange.common.api.common.messages.common.Timestamp;
 import com.herron.exchange.common.api.common.messages.common.Volume;
 import com.herron.exchange.common.api.common.messages.trading.ImmutableLimitOrder;
 import com.herron.exchange.common.api.common.messages.trading.ImmutableMarketOrder;
@@ -26,7 +26,7 @@ public class BitstampUtil {
 
     private static MarketOrder mapMarketOrder(BitstampAddOrder order) {
         return ImmutableMarketOrder.builder()
-                .timeOfEventMs(order.timeStampInMs())
+                .timeOfEvent(Timestamp.now())
                 .orderId(order.orderId())
                 .currentVolume(Volume.create(order.currentVolume()))
                 .initialVolume(Volume.create(order.initialVolume()))
@@ -42,7 +42,7 @@ public class BitstampUtil {
 
     private static LimitOrder mapLimitOrder(BitstampAddOrder order) {
         return ImmutableLimitOrder.builder()
-                .timeOfEventMs(order.timeStampInMs())
+                .timeOfEvent(Timestamp.now())
                 .orderId(order.orderId())
                 .currentVolume(Volume.create(order.currentVolume()))
                 .initialVolume(Volume.create(order.initialVolume()))
