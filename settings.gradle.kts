@@ -10,8 +10,8 @@ dependencyResolutionManagement {
             library("spring.boot.starter.parent", "org.springframework.boot:spring-boot-starter-parent:3.0.1")
             library("spring.kafka", "org.springframework.kafka:spring-kafka:3.0.1")
             library("javafaker", "com.github.javafaker:javafaker:1.0.2")
-            library("common.api", "com.herron.exchange:common-api:1.0.252")
-            library("common", "com.herron.exchange:common:1.0.252")
+            library("common.api", "com.herron.exchange:common-api:1.0.260")
+            library("common", "com.herron.exchange:common:1.0.260")
             library("integration.api", "com.herron.exchange:integration-api:1.0.25")
             library("integrations", "com.herron.exchange:integrations:1.0.25")
         }
