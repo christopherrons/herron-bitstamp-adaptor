@@ -12,21 +12,14 @@ springBoot {
 // Project Configs
 allprojects {
     repositories {
+        mavenCentral()
         mavenLocal()
-        maven {
-            name = "bytesafe"
-            url = uri("https://herron.bytesafe.dev/maven/herron/")
-            credentials {
-                username = extra["username"] as String?
-                password = extra["password"] as String?
-            }
-        }
     }
 
     apply(plugin = "maven-publish")
     apply(plugin = "java-library")
 
-    group = "com.herron.event.generator"
+    group = "com.herron.exchange"
     version = "1.0.0-SNAPSHOT"
     if (project.hasProperty("releaseVersion")) {
         val releaseVersion: String by project
@@ -102,6 +95,12 @@ tasks.register("deployToServer") {
                 execute("cd /home/herron/deploy/ && bash /home/herron/deploy/bootstrap.sh")
             })
         })
+    }
+}
+
+tasks {
+    named("build") {
+        dependsOn(named("publishToMavenLocal"))
     }
 }
 
