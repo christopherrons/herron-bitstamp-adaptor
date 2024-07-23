@@ -56,16 +56,22 @@ public class OrderEventEmulatorBroadcaster {
 
     private void runSimulation(Map<OrderbookData, Order> orderbookToInitialOrder, List<OrderbookData> orderbookDataList) {
         long nrOfEventsGenerated = 0;
+        long startTime = System.currentTimeMillis();
         while (nrOfEventsGenerated < Long.MAX_VALUE) {
-            if (nrOfEventsGenerated % maxEventsPerSecond == 0) {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException ignore) {
-
-                }
-            }
             generateEvent(orderbookToInitialOrder, orderbookDataList);
             nrOfEventsGenerated++;
+
+            if (nrOfEventsGenerated % maxEventsPerSecond == 0) {
+                long elapsedTime = System.currentTimeMillis() - startTime;
+                long sleepTime = 1000 - elapsedTime;
+                if (sleepTime > 0) {
+                    try {
+                        Thread.sleep(sleepTime);
+                    } catch (InterruptedException ignore) {
+                    }
+                }
+                startTime = System.currentTimeMillis();
+            }
         }
     }
 
