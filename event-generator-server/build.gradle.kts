@@ -1,9 +1,8 @@
 dependencies {
     // External Libs
     implementation(libs.spring.boot.starter.web)
-    implementation(libs.javafaker)
+    implementation(libs.datafaker)
     implementation(libs.spring.kafka)
-    implementation(libs.javafaker)
 
     // Internal Libs
     implementation(libs.common.api)

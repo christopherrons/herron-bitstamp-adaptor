@@ -1,7 +1,7 @@
 package com.herron.exchange.eventgenerator.server.utils;
 
-import com.github.javafaker.Faker;
 import com.herron.exchange.common.api.common.messages.common.Participant;
+import net.datafaker.Faker;
 
 import java.util.List;
 import java.util.Random;

@@ -3,6 +3,7 @@ plugins {
     id("org.springframework.boot") version "3.0.1"
     id("io.spring.dependency-management") version "1.1.0"
     id("org.hidetake.ssh") version "2.10.1"
+    id("maven-publish")
 }
 
 springBoot {
@@ -46,7 +47,7 @@ dependencies {
     implementation(libs.spring.boot.starter.web)
     implementation(libs.spring.boot.starter.parent)
     implementation(libs.spring.kafka)
-    implementation(libs.javafaker)
+    implementation(libs.datafaker)
 
     // External Test Libs
     testImplementation(testlibs.junit.jupiter.api)
