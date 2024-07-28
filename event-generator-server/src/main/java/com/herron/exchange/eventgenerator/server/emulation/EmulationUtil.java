@@ -30,7 +30,7 @@ public class EmulationUtil {
     }
 
     public static LimitOrder mapLimitOrder(OrderbookData orderbookData, Price price, OrderSideEnum sideEnum, TimeInForceEnum timeInForceEnum) {
-        double volume = RANDOM_GENERATOR.nextDouble(orderbookData.minTradeVolume(), 100.0);
+        double volume = Math.max(orderbookData.minTradeVolume(), RANDOM_GENERATOR.nextInt(100));
         return ImmutableLimitOrder.builder()
                 .timeOfEvent(Timestamp.now())
                 .orderId(String.valueOf(ORDER_ID_GENERATOR.getAndIncrement()))
@@ -49,7 +49,7 @@ public class EmulationUtil {
     }
 
     public static MarketOrder mapMarketOrder(OrderbookData orderbookData, OrderSideEnum sideEnum) {
-        double volume = RANDOM_GENERATOR.nextDouble(orderbookData.minTradeVolume(), 100.0);
+        double volume = Math.max(orderbookData.minTradeVolume(), RANDOM_GENERATOR.nextInt(100));
         return ImmutableMarketOrder.builder()
                 .timeOfEvent(Timestamp.now())
                 .orderId(String.valueOf(ORDER_ID_GENERATOR.getAndIncrement()))

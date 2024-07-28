@@ -29,7 +29,7 @@ public class OrderEventEmulatorBroadcaster {
     private static final Random RANDOM_GENERATOR = new Random(17);
     private static final double MIN_ORDER_TRADE_RATIO = 1 / 50.0;
     private static final double MAX_ORDER_TRADE_RATIO = 1 / 20.0;
-    private static final int PRICE_LEVELS= 15;
+    private static final int PRICE_LEVELS = 15;
     private final KafkaBroadcastHandler broadcastHandler;
     private final PreviousSettlementPriceConsumer settlementPriceConsumer;
     private final ExecutorService service;
@@ -85,10 +85,10 @@ public class OrderEventEmulatorBroadcaster {
             }
 
             var centerPrice = instrumentIdToSettlementPrice.get(orderbookData.instrument().instrumentId());
-            var spread = orderbookData.tickSize();
+            var spread = Price.create(orderbookData.tickSize());
             var priceGenerator = new PriceGenerator(
                     orderbookData,
-                    centerPrice.price().getRealValue(),
+                    centerPrice.price(),
                     spread,
                     Math.min(MIN_ORDER_TRADE_RATIO, RANDOM_GENERATOR.nextDouble(MAX_ORDER_TRADE_RATIO))
             );
@@ -106,27 +106,27 @@ public class OrderEventEmulatorBroadcaster {
             return;
         }
 
-        var price = Price.create(priceGenerator.generatePrice());
-        var side = priceGenerator.generateSide(price.getRealValue());
+        var price = priceGenerator.generatePrice();
+        var side = priceGenerator.generateSide(price);
         var addOrder = mapAddOrder(orderbookData, price, side);
 
         broadcastHandler.broadcastMessage(KEY, addOrder);
     }
 
-    private record PriceGenerator(OrderbookData orderbookData, double centerPrice, double spread, double orderTradeRatio) {
+    private record PriceGenerator(OrderbookData orderbookData, Price centerPrice, Price spread, double orderTradeRatio) {
 
-        private double generatePrice() {
+        private Price generatePrice() {
             var level = RANDOM_GENERATOR.nextInt(PRICE_LEVELS);
             level = RANDOM_GENERATOR.nextBoolean() ? level : level * -1;
-            return centerPrice + level * spread;
+            return centerPrice.add(spread.multiply(level));
         }
 
-        private OrderSideEnum generateSide(double price) {
+        private OrderSideEnum generateSide(Price price) {
             boolean crossCenter = RANDOM_GENERATOR.nextDouble() <= orderTradeRatio;
             if (crossCenter) {
-                return (price < centerPrice) ? ASK : BID;
+                return (price.lt(centerPrice)) ? ASK : BID;
             } else {
-                return (price < centerPrice) ? BID : ASK;
+                return (price.lt(centerPrice)) ? BID : ASK;
             }
         }
     }
