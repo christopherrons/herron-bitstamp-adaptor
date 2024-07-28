@@ -1,7 +1,6 @@
 package com.herron.exchange.eventgenerator.server.emulation;
 
 import com.herron.exchange.common.api.common.api.referencedata.orderbook.OrderbookData;
-import com.herron.exchange.common.api.common.api.trading.Order;
 import com.herron.exchange.common.api.common.cache.ReferenceDataCache;
 import com.herron.exchange.common.api.common.enums.KafkaTopicEnum;
 import com.herron.exchange.common.api.common.enums.OrderSideEnum;
@@ -13,27 +12,26 @@ import com.herron.exchange.eventgenerator.server.consumers.PreviousSettlementPri
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static com.herron.exchange.common.api.common.enums.OrderSideEnum.ASK;
 import static com.herron.exchange.common.api.common.enums.OrderSideEnum.BID;
 import static com.herron.exchange.eventgenerator.server.emulation.EmulationUtil.mapAddOrder;
-import static com.herron.exchange.eventgenerator.server.emulation.EmulationUtil.mapLimitOrder;
 
 public class OrderEventEmulatorBroadcaster {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderEventEmulatorBroadcaster.class);
     private static final PartitionKey KEY = new PartitionKey(KafkaTopicEnum.USER_ORDER_DATA, 0);
     private static final Random RANDOM_GENERATOR = new Random(17);
-    private static final int PRICE_LEVELS_PER_SIDE = 15;
     private static final double ORDER_TRADE_RATIO = 1 / 20.0;
     private final KafkaBroadcastHandler broadcastHandler;
     private final PreviousSettlementPriceConsumer settlementPriceConsumer;
     private final ExecutorService service;
     private final int maxEventsPerSecond;
-    private final Map<OrderbookData, TreeSet<Price>> orderbookToBidPrices = new HashMap<>();
-    private final Map<OrderbookData, TreeSet<Price>> orderbookToAskPrices = new HashMap<>();
 
 
     public OrderEventEmulatorBroadcaster(int maxEventsPerSecond,
@@ -51,17 +49,16 @@ public class OrderEventEmulatorBroadcaster {
 
     private void runEmulation() {
         LOGGER.info("Init emulation.");
-        Map<OrderbookData, Order> orderbookToInitialOrder = createAndBroadcastInitialOrders();
-        List<OrderbookData> orderbookDataList = new ArrayList<>(orderbookToInitialOrder.keySet());
+        Set<PriceGenerator> priceGenerators = createPriceGenerator();
 
-        runEmulation(orderbookDataList);
+        runEmulation(priceGenerators.stream().toList());
     }
 
-    private void runEmulation(List<OrderbookData> orderbookDataList) {
+    private void runEmulation(List<PriceGenerator> priceGenerators) {
         long nrOfEventsGenerated = 0;
         long startTime = System.currentTimeMillis();
         while (nrOfEventsGenerated < Long.MAX_VALUE) {
-            generateEvent(orderbookDataList);
+            generateEvent(priceGenerators);
             nrOfEventsGenerated++;
 
             if (nrOfEventsGenerated % maxEventsPerSecond == 0) {
@@ -77,66 +74,51 @@ public class OrderEventEmulatorBroadcaster {
         }
     }
 
-    private Map<OrderbookData, Order> createAndBroadcastInitialOrders() {
+    private Set<PriceGenerator> createPriceGenerator() {
+        Set<PriceGenerator> priceGenerators = new HashSet<>();
         var instrumentIdToSettlementPrice = settlementPriceConsumer.getInstrumentIdToPreviousSettlementPrices();
-        Map<OrderbookData, Order> orderbookToInitialOrder = new HashMap<>();
         for (var orderbookData : ReferenceDataCache.getCache().getOrderbookData()) {
             if (!instrumentIdToSettlementPrice.containsKey(orderbookData.instrument().instrumentId())) {
                 continue;
             }
 
-            var startPrice = instrumentIdToSettlementPrice.get(orderbookData.instrument().instrumentId()).price();
-            var side = RANDOM_GENERATOR.nextBoolean() ? BID : ASK;
-            switch (side) {
-                case BID ->
-                        orderbookToBidPrices.computeIfAbsent(orderbookData, k -> new TreeSet<>(Comparator.comparing(Price::getValue).reversed())).add(startPrice);
-                case ASK -> orderbookToAskPrices.computeIfAbsent(orderbookData, k -> new TreeSet<>(Comparator.comparing(Price::getValue))).add(startPrice);
-            }
-            var addOrder = mapLimitOrder(orderbookData, startPrice, side);
-            orderbookToInitialOrder.put(orderbookData, addOrder);
-            broadcastHandler.broadcastMessage(KEY, addOrder);
+            var centerPrice = instrumentIdToSettlementPrice.get(orderbookData.instrument().instrumentId());
+            var spread = orderbookData.tickSize();
+            var priceGenerator = new PriceGenerator(orderbookData, centerPrice.price().getRealValue(), spread);
+            priceGenerators.add(priceGenerator);
+
         }
-        return orderbookToInitialOrder;
+        return priceGenerators;
     }
 
-    private void generateEvent(List<OrderbookData> orderbookDataList) {
+    private void generateEvent(List<PriceGenerator> orderbookDataList) {
         var instrumentIdToSettlementPrice = settlementPriceConsumer.getInstrumentIdToPreviousSettlementPrices();
-        var orderbookData = orderbookDataList.get(RANDOM_GENERATOR.nextInt(orderbookDataList.size()));
+        var priceGenerator = orderbookDataList.get(RANDOM_GENERATOR.nextInt(orderbookDataList.size()));
+        var orderbookData = priceGenerator.orderbookData();
         if (!instrumentIdToSettlementPrice.containsKey(orderbookData.instrument().instrumentId())) {
             return;
         }
 
-        var bidPrices = orderbookToBidPrices.computeIfAbsent(orderbookData, k -> new TreeSet<>(Comparator.comparing(Price::getValue).reversed()));
-        var askPrices = orderbookToAskPrices.computeIfAbsent(orderbookData, k -> new TreeSet<>(Comparator.comparing(Price::getValue)));
-        var newBidPrice = bidPrices.isEmpty()
-                ? askPrices.first().add(orderbookData.tickSize() * RANDOM_GENERATOR.nextInt(0, PRICE_LEVELS_PER_SIDE))
-                : bidPrices.first().add(orderbookData.tickSize() * RANDOM_GENERATOR.nextInt(0, PRICE_LEVELS_PER_SIDE));
-        var newAskPrice = askPrices.isEmpty()
-                ? bidPrices.first().add(orderbookData.tickSize() * RANDOM_GENERATOR.nextInt(0, PRICE_LEVELS_PER_SIDE))
-                : askPrices.first().add(orderbookData.tickSize() * RANDOM_GENERATOR.nextInt(0, PRICE_LEVELS_PER_SIDE));
+        var price = Price.create(priceGenerator.generatePrice());
+        var side = priceGenerator.generateSide(price.getRealValue());
+        var addOrder = mapAddOrder(orderbookData, price, side);
 
-        OrderSideEnum side = RANDOM_GENERATOR.nextBoolean() ? BID : ASK;
-        if ((side == BID && !askPrices.isEmpty() && newBidPrice.geq(askPrices.first())) || (side == ASK && !bidPrices.isEmpty() && newAskPrice.leq(bidPrices.first()))) {
-            if (RANDOM_GENERATOR.nextDouble() <= ORDER_TRADE_RATIO) {
-                switch (side) {
-                    case BID -> askPrices.removeIf(price -> price.leq(newBidPrice));
-                    case ASK -> bidPrices.removeIf(price -> price.geq(newAskPrice));
-                }
-            } else {
-                return;
-            }
+        broadcastHandler.broadcastMessage(KEY, addOrder);
+    }
+
+    private record PriceGenerator(OrderbookData orderbookData, double centerPrice, double spread) {
+
+        private double generatePrice() {
+            return centerPrice + (RANDOM_GENERATOR.nextDouble() - 0.5) * 2 * spread;
         }
 
-        var addOrder = switch (side) {
-            case BID -> {
-                bidPrices.add(newBidPrice);
-                yield mapAddOrder(orderbookData, newBidPrice, side);
+        private OrderSideEnum generateSide(double price) {
+            boolean crossCenter = RANDOM_GENERATOR.nextDouble() < ORDER_TRADE_RATIO;
+            if (crossCenter) {
+                return (price < centerPrice) ? ASK : BID;
+            } else {
+                return (price < centerPrice) ? BID : ASK;
             }
-            case ASK -> {
-                askPrices.add(newAskPrice);
-                yield mapAddOrder(orderbookData, newAskPrice, side);
-            }
-        };
-        broadcastHandler.broadcastMessage(KEY, addOrder);
+        }
     }
 }

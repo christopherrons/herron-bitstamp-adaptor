@@ -31,7 +31,7 @@ public class EventGenerationBootloader extends Bootloader {
         previousSettlementPriceConsumer.init();
         referenceDataConsumer.await();
         previousSettlementPriceConsumer.await();
-        //eventEmulator.init();
+        eventEmulator.init();
         bootloaderComplete();
     }
 }
