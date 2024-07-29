@@ -29,6 +29,7 @@ public class OrderEventEmulatorBroadcaster {
     private static final Random RANDOM_GENERATOR = new Random(17);
     private static final double MIN_ORDER_TRADE_RATIO = 1 / 50.0;
     private static final double MAX_ORDER_TRADE_RATIO = 1 / 20.0;
+    private static final double SHOCK_RATIO = 1 / 20.0;
     private static final int PRICE_LEVELS = 15;
     private final KafkaBroadcastHandler broadcastHandler;
     private final PreviousSettlementPriceConsumer settlementPriceConsumer;
@@ -60,7 +61,11 @@ public class OrderEventEmulatorBroadcaster {
         long nrOfEventsGenerated = 0;
         long startTime = System.currentTimeMillis();
         while (nrOfEventsGenerated < Long.MAX_VALUE) {
-            generateEvent(priceGenerators);
+            var priceGenerator = priceGenerators.get(RANDOM_GENERATOR.nextInt(priceGenerators.size()));
+            if (RANDOM_GENERATOR.nextDouble() < SHOCK_RATIO) {
+                priceGenerator.shockPrice();
+            }
+            generateEvent(priceGenerator);
             nrOfEventsGenerated++;
 
             if (nrOfEventsGenerated % maxEventsPerSecond == 0) {
@@ -98,10 +103,10 @@ public class OrderEventEmulatorBroadcaster {
         return priceGenerators;
     }
 
-    private void generateEvent(List<PriceGenerator> orderbookDataList) {
+    private void generateEvent(PriceGenerator priceGenerator) {
         var instrumentIdToSettlementPrice = settlementPriceConsumer.getInstrumentIdToPreviousSettlementPrices();
-        var priceGenerator = orderbookDataList.get(RANDOM_GENERATOR.nextInt(orderbookDataList.size()));
-        var orderbookData = priceGenerator.orderbookData();
+
+        var orderbookData = priceGenerator.getOrderbookData();
         if (!instrumentIdToSettlementPrice.containsKey(orderbookData.instrument().instrumentId())) {
             return;
         }
@@ -113,7 +118,22 @@ public class OrderEventEmulatorBroadcaster {
         broadcastHandler.broadcastMessage(KEY, addOrder);
     }
 
-    private record PriceGenerator(OrderbookData orderbookData, Price centerPrice, Price spread, double orderTradeRatio) {
+    private static class PriceGenerator {
+        private final OrderbookData orderbookData;
+        private final Price spread;
+        private final double orderTradeRatio;
+        private Price centerPrice;
+
+        public PriceGenerator(OrderbookData orderbookData, Price centerPrice, Price spread, double orderTradeRatio) {
+            this.orderbookData = orderbookData;
+            this.centerPrice = centerPrice;
+            this.spread = spread;
+            this.orderTradeRatio = orderTradeRatio;
+        }
+
+        private void shockPrice() {
+            centerPrice = centerPrice.add(spread.multiply(RANDOM_GENERATOR.nextInt(1, 4)).multiply(RANDOM_GENERATOR.nextBoolean() ? 1 : -1));
+        }
 
         private Price generatePrice() {
             var level = RANDOM_GENERATOR.nextInt(PRICE_LEVELS);
@@ -128,6 +148,10 @@ public class OrderEventEmulatorBroadcaster {
             } else {
                 return (price.lt(centerPrice)) ? BID : ASK;
             }
+        }
+
+        public OrderbookData getOrderbookData() {
+            return orderbookData;
         }
     }
 }
