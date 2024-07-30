@@ -29,7 +29,7 @@ public class OrderEventEmulatorBroadcaster {
     private static final Random RANDOM_GENERATOR = new Random(17);
     private static final double MIN_ORDER_TRADE_RATIO = 1 / 50.0;
     private static final double MAX_ORDER_TRADE_RATIO = 1 / 20.0;
-    private static final double SHOCK_RATIO = 1 / 20.0;
+    private static final double SHOCK_RATIO = 1 / 10.0;
     private static final int PRICE_LEVELS = 15;
     private final KafkaBroadcastHandler broadcastHandler;
     private final PreviousSettlementPriceConsumer settlementPriceConsumer;
@@ -62,7 +62,7 @@ public class OrderEventEmulatorBroadcaster {
         long startTime = System.currentTimeMillis();
         while (nrOfEventsGenerated < Long.MAX_VALUE) {
             var priceGenerator = priceGenerators.get(RANDOM_GENERATOR.nextInt(priceGenerators.size()));
-            if (RANDOM_GENERATOR.nextDouble() < SHOCK_RATIO) {
+            if (RANDOM_GENERATOR.nextDouble() <= SHOCK_RATIO) {
                 priceGenerator.shockPrice();
             }
             generateEvent(priceGenerator);
@@ -132,7 +132,7 @@ public class OrderEventEmulatorBroadcaster {
         }
 
         private void shockPrice() {
-            centerPrice = centerPrice.add(spread.multiply(RANDOM_GENERATOR.nextInt(1, 4)).multiply(RANDOM_GENERATOR.nextBoolean() ? 1 : -1));
+            centerPrice = centerPrice.add(spread.multiply(RANDOM_GENERATOR.nextInt(1, PRICE_LEVELS)).multiply(RANDOM_GENERATOR.nextBoolean() ? 1 : -1));
         }
 
         private Price generatePrice() {
