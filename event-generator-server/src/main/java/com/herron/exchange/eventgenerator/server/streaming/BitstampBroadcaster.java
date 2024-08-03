@@ -15,9 +15,9 @@ import java.util.List;
 import static com.herron.exchange.common.api.common.enums.OrderOperationEnum.INSERT;
 
 public class BitstampBroadcaster {
+    public static final PartitionKey KEY = new PartitionKey(KafkaTopicEnum.USER_ORDER_DATA, 1);
     private static final Logger LOGGER = LoggerFactory.getLogger(BitstampBroadcaster.class);
     private static final int TIME_IN_QUEUE_MS = 10000;
-    public static final PartitionKey KEY = new PartitionKey(KafkaTopicEnum.USER_ORDER_DATA, 1);
     private final TimeBoundBlockingPriorityQueue<Event> eventPriorityQueue = new TimeBoundBlockingPriorityQueue<>(TIME_IN_QUEUE_MS);
     private final KafkaBroadcastHandler broadcastHandler;
 
