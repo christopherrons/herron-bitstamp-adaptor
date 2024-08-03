@@ -5,15 +5,15 @@ import com.herron.exchange.integrations.bitstamp.BitstampWebsocketClient;
 import com.herron.exchange.integrations.bitstamp.model.BitstampWebsocketRequest;
 
 
-public class BitstampConsumer {
+public class BitstampSubscriptionHandler {
 
     private final EventGeneratorConfig.BitstampSubscriptionDetailConfig bitstampSubscriptionDetailConfig;
     private final BitstampBroadcaster bitstampMessageBroadcaster;
     private final BitstampWebsocketClient client;
 
-    public BitstampConsumer(EventGeneratorConfig.BitstampSubscriptionDetailConfig bitstampSubscriptionDetailConfig,
-                            BitstampBroadcaster bitstampBroadcaster,
-                            BitstampWebsocketClient client) {
+    public BitstampSubscriptionHandler(EventGeneratorConfig.BitstampSubscriptionDetailConfig bitstampSubscriptionDetailConfig,
+                                       BitstampBroadcaster bitstampBroadcaster,
+                                       BitstampWebsocketClient client) {
         this.bitstampSubscriptionDetailConfig = bitstampSubscriptionDetailConfig;
         this.bitstampMessageBroadcaster = bitstampBroadcaster;
         this.client = client;

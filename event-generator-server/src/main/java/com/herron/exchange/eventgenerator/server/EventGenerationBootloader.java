@@ -4,21 +4,21 @@ import com.herron.exchange.common.api.common.bootloader.Bootloader;
 import com.herron.exchange.eventgenerator.server.consumers.PreviousSettlementPriceConsumer;
 import com.herron.exchange.eventgenerator.server.consumers.ReferenceDataConsumer;
 import com.herron.exchange.eventgenerator.server.emulation.OrderEventEmulatorBroadcaster;
-import com.herron.exchange.eventgenerator.server.streaming.BitstampConsumer;
+import com.herron.exchange.eventgenerator.server.streaming.BitstampSubscriptionHandler;
 
 public class EventGenerationBootloader extends Bootloader {
 
-    private final BitstampConsumer bitstampConsumer;
+    private final BitstampSubscriptionHandler bitstampSubscriptionHandler;
     private final OrderEventEmulatorBroadcaster eventEmulator;
     private final PreviousSettlementPriceConsumer previousSettlementPriceConsumer;
     private final ReferenceDataConsumer referenceDataConsumer;
 
-    public EventGenerationBootloader(BitstampConsumer bitstampConsumer,
+    public EventGenerationBootloader(BitstampSubscriptionHandler bitstampSubscriptionHandler,
                                      OrderEventEmulatorBroadcaster eventEmulator,
                                      PreviousSettlementPriceConsumer previousSettlementPriceConsumer,
                                      ReferenceDataConsumer referenceDataConsumer) {
         super("Event-Generation");
-        this.bitstampConsumer = bitstampConsumer;
+        this.bitstampSubscriptionHandler = bitstampSubscriptionHandler;
         this.eventEmulator = eventEmulator;
         this.previousSettlementPriceConsumer = previousSettlementPriceConsumer;
         this.referenceDataConsumer = referenceDataConsumer;
@@ -26,7 +26,7 @@ public class EventGenerationBootloader extends Bootloader {
 
     @Override
     protected void bootloaderInit() {
-        bitstampConsumer.init();
+        bitstampSubscriptionHandler.init();
         referenceDataConsumer.init();
         previousSettlementPriceConsumer.init();
         referenceDataConsumer.await();

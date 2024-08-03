@@ -9,7 +9,7 @@ import com.herron.exchange.eventgenerator.server.consumers.PreviousSettlementPri
 import com.herron.exchange.eventgenerator.server.consumers.ReferenceDataConsumer;
 import com.herron.exchange.eventgenerator.server.emulation.OrderEventEmulatorBroadcaster;
 import com.herron.exchange.eventgenerator.server.streaming.BitstampBroadcaster;
-import com.herron.exchange.eventgenerator.server.streaming.BitstampConsumer;
+import com.herron.exchange.eventgenerator.server.streaming.BitstampSubscriptionHandler;
 import com.herron.exchange.integrations.bitstamp.BitstampWebsocketClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -59,18 +59,18 @@ public class EventGeneratorConfig {
     }
 
     @Bean
-    public BitstampConsumer bitstampConsumer(BitstampSubscriptionDetailConfig bitstampSubscriptionDetailConfig,
-                                             BitstampBroadcaster bitstampBroadcaster,
-                                             BitstampWebsocketClient bitstampWebsocketClient) {
-        return new BitstampConsumer(bitstampSubscriptionDetailConfig, bitstampBroadcaster, bitstampWebsocketClient);
+    public BitstampSubscriptionHandler bitstampConsumer(BitstampSubscriptionDetailConfig bitstampSubscriptionDetailConfig,
+                                                        BitstampBroadcaster bitstampBroadcaster,
+                                                        BitstampWebsocketClient bitstampWebsocketClient) {
+        return new BitstampSubscriptionHandler(bitstampSubscriptionDetailConfig, bitstampBroadcaster, bitstampWebsocketClient);
     }
 
     @Bean(initMethod = "init")
-    public EventGenerationBootloader eventGenerationBootloader(BitstampConsumer bitstampConsumer,
+    public EventGenerationBootloader eventGenerationBootloader(BitstampSubscriptionHandler bitstampSubscriptionHandler,
                                                                OrderEventEmulatorBroadcaster orderEventEmulatorBroadcaster,
                                                                PreviousSettlementPriceConsumer previousSettlementPriceConsumer,
                                                                ReferenceDataConsumer referenceDataConsumer) {
-        return new EventGenerationBootloader(bitstampConsumer, orderEventEmulatorBroadcaster, previousSettlementPriceConsumer, referenceDataConsumer);
+        return new EventGenerationBootloader(bitstampSubscriptionHandler, orderEventEmulatorBroadcaster, previousSettlementPriceConsumer, referenceDataConsumer);
     }
 
     @Component
