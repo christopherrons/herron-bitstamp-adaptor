@@ -65,6 +65,7 @@ public class OrderEventEmulatorBroadcaster {
             if (RANDOM_GENERATOR.nextDouble() <= SHOCK_RATIO) {
                 priceGenerator.shockPrice();
             }
+
             generateEvent(priceGenerator);
             nrOfEventsGenerated++;
 
