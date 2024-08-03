@@ -87,8 +87,12 @@ public class OrderEventEmulatorBroadcaster {
         var instrumentIdToSettlementPrice = settlementPriceConsumer.getInstrumentIdToPreviousSettlementPrices();
         for (var orderbookData : ReferenceDataCache.getCache().getOrderbookData()) {
 
+            if (!instrumentIdToSettlementPrice.containsKey(orderbookData.instrument().instrumentId())) {
+                continue;
+            }
+
             var spread = Price.create(orderbookData.tickSize());
-            var centerPrice = instrumentIdToSettlementPrice.getOrDefault(orderbookData.instrument().instrumentId(), spread.multiply(PRICE_LEVELS));
+            var centerPrice = instrumentIdToSettlementPrice.get(orderbookData.instrument().instrumentId());
             var priceGenerator = new PriceGenerator(
                     orderbookData,
                     centerPrice,

@@ -27,7 +27,7 @@ kafka:
         topic: "reference-data"
 
 emulation:
-  max-event-per-second: 5000
+  max-event-per-second: 1000
 
 bitstamp:
   subscription-config:
