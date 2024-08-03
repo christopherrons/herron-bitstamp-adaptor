@@ -8,6 +8,7 @@ import com.herron.exchange.common.api.common.kafka.model.KafkaSubscriptionDetail
 import com.herron.exchange.common.api.common.kafka.model.KafkaSubscriptionRequest;
 import com.herron.exchange.common.api.common.messages.BroadcastMessage;
 import com.herron.exchange.common.api.common.messages.common.DataStreamState;
+import com.herron.exchange.common.api.common.messages.common.Price;
 import com.herron.exchange.common.api.common.messages.marketdata.entries.MarketDataPrice;
 
 import java.util.List;
@@ -19,7 +20,7 @@ import java.util.concurrent.CountDownLatch;
 public class PreviousSettlementPriceConsumer extends DataConsumer implements KafkaMessageHandler {
     private final KafkaConsumerClient consumerClient;
     private final List<KafkaSubscriptionRequest> requests;
-    private final Map<String, MarketDataPrice> instrumentIdToPreviousSettlementPrices = new ConcurrentHashMap<>();
+    private final Map<String, Price> instrumentIdToPreviousSettlementPrices = new ConcurrentHashMap<>();
 
     public PreviousSettlementPriceConsumer(KafkaConsumerClient consumerClient, List<KafkaSubscriptionDetails> subscriptionDetails) {
         super("Previous-Settlement-Price", new CountDownLatch(subscriptionDetails.size()));
@@ -47,11 +48,11 @@ public class PreviousSettlementPriceConsumer extends DataConsumer implements Kaf
                 }
             }
         } else if (message instanceof MarketDataPrice marketDataPrice) {
-            instrumentIdToPreviousSettlementPrices.put(marketDataPrice.staticKey().instrumentId(), marketDataPrice);
+            instrumentIdToPreviousSettlementPrices.put(marketDataPrice.staticKey().instrumentId(), marketDataPrice.price());
         }
     }
 
-    public Map<String, MarketDataPrice> getInstrumentIdToPreviousSettlementPrices() {
+    public Map<String, Price> getInstrumentIdToPreviousSettlementPrices() {
         return instrumentIdToPreviousSettlementPrices;
     }
 

@@ -86,15 +86,12 @@ public class OrderEventEmulatorBroadcaster {
         Set<PriceGenerator> priceGenerators = new HashSet<>();
         var instrumentIdToSettlementPrice = settlementPriceConsumer.getInstrumentIdToPreviousSettlementPrices();
         for (var orderbookData : ReferenceDataCache.getCache().getOrderbookData()) {
-            if (!instrumentIdToSettlementPrice.containsKey(orderbookData.instrument().instrumentId())) {
-                continue;
-            }
 
-            var centerPrice = instrumentIdToSettlementPrice.get(orderbookData.instrument().instrumentId());
             var spread = Price.create(orderbookData.tickSize());
+            var centerPrice = instrumentIdToSettlementPrice.getOrDefault(orderbookData.instrument().instrumentId(), spread.multiply(PRICE_LEVELS));
             var priceGenerator = new PriceGenerator(
                     orderbookData,
-                    centerPrice.price(),
+                    centerPrice,
                     spread,
                     Math.min(MIN_ORDER_TRADE_RATIO, RANDOM_GENERATOR.nextDouble(MAX_ORDER_TRADE_RATIO))
             );
@@ -105,13 +102,7 @@ public class OrderEventEmulatorBroadcaster {
     }
 
     private void generateEvent(PriceGenerator priceGenerator) {
-        var instrumentIdToSettlementPrice = settlementPriceConsumer.getInstrumentIdToPreviousSettlementPrices();
-
         var orderbookData = priceGenerator.getOrderbookData();
-        if (!instrumentIdToSettlementPrice.containsKey(orderbookData.instrument().instrumentId())) {
-            return;
-        }
-
         var price = priceGenerator.generatePrice();
         var side = priceGenerator.generateSide(price);
         var addOrder = mapAddOrder(orderbookData, price, side);
