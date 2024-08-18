@@ -59,9 +59,9 @@ public class EventGeneratorConfig {
     }
 
     @Bean
-    public BitstampSubscriptionHandler bitstampConsumer(BitstampSubscriptionDetailConfig bitstampSubscriptionDetailConfig,
-                                                        BitstampBroadcaster bitstampBroadcaster,
-                                                        BitstampWebsocketClient bitstampWebsocketClient) {
+    public BitstampSubscriptionHandler bitstampSubscriptionHandler(BitstampSubscriptionDetailConfig bitstampSubscriptionDetailConfig,
+                                                                   BitstampBroadcaster bitstampBroadcaster,
+                                                                   BitstampWebsocketClient bitstampWebsocketClient) {
         return new BitstampSubscriptionHandler(bitstampSubscriptionDetailConfig, bitstampBroadcaster, bitstampWebsocketClient);
     }
 
