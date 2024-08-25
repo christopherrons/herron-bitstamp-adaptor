@@ -2,7 +2,9 @@ package com.herron.exchange.eventgenerator.server.streaming;
 
 import com.herron.exchange.eventgenerator.server.config.EventGeneratorConfig;
 import com.herron.exchange.integrations.bitstamp.BitstampWebsocketClient;
-import com.herron.exchange.integrations.bitstamp.model.BitstampWebsocketRequest;
+import com.herron.exchange.integrations.bitstamp.client.BitstampWebsocketRequest;
+
+import static com.herron.exchange.integrations.bitstamp.client.BitstampWebsocketRequest.RequestType.SUBSCRIBE;
 
 
 public class BitstampSubscriptionHandler {
@@ -21,8 +23,8 @@ public class BitstampSubscriptionHandler {
 
     public void init() {
         bitstampSubscriptionDetailConfig.getChannels().forEach(ch -> {
-            var request = new BitstampWebsocketRequest(bitstampSubscriptionDetailConfig.getUri(), ch);
-            client.subscribe(bitstampMessageBroadcaster::handleMessage, request);
+            var request = new BitstampWebsocketRequest(bitstampSubscriptionDetailConfig.getUri(), ch, bitstampMessageBroadcaster::handleMessage, SUBSCRIBE);
+            client.subscribe(request);
         });
     }
 }
